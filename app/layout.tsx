@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/styles/globals.css";
+import { HeaderNav } from "@/components/header-nav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,6 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://vendor.pickspot.world'),
   title: {
     default: "Pickspot Vendor Portal",
     template: "%s | Pickspot Vendor Portal"
@@ -65,16 +67,8 @@ export const metadata: Metadata = {
     creator: "@PickspotNetwork",
     images: ["/images/app.png"]
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1
-  },
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" }
-  ],
-  manifest: "/manifest.json",
+
+  manifest: "/icons/site.webmanifest",
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
@@ -102,6 +96,16 @@ export const metadata: Metadata = {
   category: "business"
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" }
+  ]
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -112,6 +116,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <HeaderNav />
         {children}
       </body>
     </html>
