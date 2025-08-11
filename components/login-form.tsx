@@ -5,16 +5,40 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Notification } from "@/components/ui/notification"
 import Image from "next/image"
-import { useState } from "react"
+import { useState, FormEvent, Dispatch, SetStateAction } from "react"
+import { useAuth } from "@/hooks/useAuth"
+import { Loader2 } from "lucide-react"
+import Link from "next/link"
+import { PasswordStrength } from "@/components/password-strength"
+import { validatePassword } from "@/lib/password-validation"
+import { validatePhoneNumber, validateName, validateFormInput } from "@/lib/input-sanitization"
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
-  const [activeTab, setActiveTab] = useState<"login" | "signup">("login")
+type LoginFormState = {
+  phoneNumber: string
+  password: string
+}
 
-  const LoginFormContent = () => (
+type SignupFormState = {
+  firstName: string
+  lastName: string
+  phoneNumber: string
+  password: string
+}
+
+function LoginFields({
+  loginForm,
+  setLoginForm,
+  isLoading,
+  onSwitchToSignup,
+}: {
+  loginForm: LoginFormState
+  setLoginForm: Dispatch<SetStateAction<LoginFormState>>
+  isLoading: boolean
+  onSwitchToSignup: () => void
+}) {
+  return (
     <>
       <div className="flex flex-col items-center text-center">
         <h1 className="text-2xl font-bold">Welcome back</h1>
@@ -23,52 +47,82 @@ export function LoginForm({
         </p>
       </div>
       <div className="grid gap-3">
-        <Label htmlFor="phone">Phone Number</Label>
+        <Label htmlFor="login-phone">Phone Number</Label>
         <Input
-          id="tel"
+          id="login-phone"
           type="tel"
-          placeholder="+254 701 234 567"
+          placeholder="0708575242"
+          value={loginForm.phoneNumber}
+          onChange={(e) => setLoginForm((prev) => ({ ...prev, phoneNumber: e.target.value }))}
           required
+          disabled={isLoading}
+          className="focus-visible:ring-[#D62E1F] focus-visible:ring-2"
         />
       </div>
       <div className="grid gap-3">
         <div className="flex items-center">
-          <Label htmlFor="password">Password</Label>
-          <a
-            href="#"
-            className="ml-auto text-sm underline-offset-2 hover:underline"
+          <Label htmlFor="login-password">Password</Label>
+          <Link 
+            href="/forgot-password" 
+            className="ml-auto text-sm underline-offset-2 hover:underline hover:text-[#D62E1F] transition-colors"
           >
             Forgot your password?
-          </a>
+          </Link>
         </div>
-        <Input id="password" type="password" required />
+        <Input
+          id="login-password"
+          type="password"
+          value={loginForm.password}
+          onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
+          required
+          disabled={isLoading}
+          className="focus-visible:ring-[#D62E1F] focus-visible:ring-2"
+        />
       </div>
-      <Button type="submit" className="w-full">
-        Login
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Logging in...
+          </>
+        ) : (
+          "Login"
+        )}
       </Button>
       <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
         <span className="bg-card text-muted-foreground relative z-10 px-2">
           Don&apos;t have an account?{" "}
         </span>
       </div>
-      <Button 
-        type="button" 
-        variant="outline" 
+      <Button
+        type="button"
+        variant="outline"
         className="w-full"
-        onClick={() => setActiveTab("signup")}
+        onClick={onSwitchToSignup}
+        disabled={isLoading}
       >
         Sign up
       </Button>
     </>
   )
+}
 
-  const SignupFormContent = () => (
+function SignupFields({
+  signupForm,
+  setSignupForm,
+  isLoading,
+  onSwitchToLogin,
+}: {
+  signupForm: SignupFormState
+  setSignupForm: Dispatch<SetStateAction<SignupFormState>>
+  isLoading: boolean
+  onSwitchToLogin: () => void
+}) {
+  return (
     <>
       <div className="flex flex-col items-center text-center">
         <h1 className="text-2xl font-bold">Create account</h1>
-        <p className="text-muted-foreground text-balance">
-          Join Pickspot Vendor platform
-        </p>
+        <p className="text-muted-foreground text-balance">Join Pickspot Vendor platform</p>
       </div>
       <div className="grid gap-2">
         <Label htmlFor="signup-firstname">First Name</Label>
@@ -76,7 +130,11 @@ export function LoginForm({
           id="signup-firstname"
           type="text"
           placeholder="John"
+          value={signupForm.firstName}
+          onChange={(e) => setSignupForm((prev) => ({ ...prev, firstName: e.target.value }))}
           required
+          disabled={isLoading}
+          className="focus-visible:ring-[#D62E1F] focus-visible:ring-2"
         />
       </div>
       <div className="grid gap-2">
@@ -85,7 +143,11 @@ export function LoginForm({
           id="signup-lastname"
           type="text"
           placeholder="Doe"
+          value={signupForm.lastName}
+          onChange={(e) => setSignupForm((prev) => ({ ...prev, lastName: e.target.value }))}
           required
+          disabled={isLoading}
+          className="focus-visible:ring-[#D62E1F] focus-visible:ring-2"
         />
       </div>
       <div className="grid gap-2">
@@ -93,38 +155,158 @@ export function LoginForm({
         <Input
           id="signup-phone"
           type="tel"
-          placeholder="+254 701 234 567"
+          placeholder="0708575242"
+          value={signupForm.phoneNumber}
+          onChange={(e) => setSignupForm((prev) => ({ ...prev, phoneNumber: e.target.value }))}
           required
+          disabled={isLoading}
+          className="focus-visible:ring-[#D62E1F] focus-visible:ring-2"
         />
       </div>
       <div className="grid gap-2">
         <Label htmlFor="signup-password">Password</Label>
-        <Input id="signup-password" type="password" required />
-        </div>
-      <Button type="submit" className="w-full">
-        Create Account
+        <Input
+          id="signup-password"
+          type="password"
+          value={signupForm.password}
+          onChange={(e) => setSignupForm((prev) => ({ ...prev, password: e.target.value }))}
+          required
+          disabled={isLoading}
+          className="focus-visible:ring-[#D62E1F] focus-visible:ring-2"
+        />
+        <PasswordStrength password={signupForm.password} />
+      </div>
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Creating Account...
+          </>
+        ) : (
+          "Create Account"
+        )}
       </Button>
       <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
         <span className="bg-card text-muted-foreground relative z-10 px-2">
           Already have an account?{" "}
         </span>
       </div>
-      <Button 
-        type="button" 
-        variant="outline" 
+      <Button
+        type="button"
+        variant="outline"
         className="w-full"
-        onClick={() => setActiveTab("login")}
+        onClick={onSwitchToLogin}
+        disabled={isLoading}
       >
         Login
       </Button>
     </>
   )
+}
+
+export function LoginForm({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
+  const [activeTab, setActiveTab] = useState<"login" | "signup">("login")
+  const { isLoading, error, success, login, signup, clearMessages } = useAuth()
+  
+  const [loginForm, setLoginForm] = useState({
+    phoneNumber: '',
+    password: ''
+  })
+  
+  const [signupForm, setSignupForm] = useState({
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
+    password: ''
+  })
+
+  const handleLoginSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    clearMessages()
+    
+    if (!loginForm.phoneNumber || !loginForm.password) {
+      return
+    }
+
+    const phoneValidation = validatePhoneNumber(loginForm.phoneNumber)
+    if (!phoneValidation.isValid) {
+      return
+    }
+
+    const passwordValidation = validateFormInput(loginForm.password, "Password")
+    if (!passwordValidation.isValid) {
+      return
+    }
+
+    const payload = {
+      phoneNumber: phoneValidation.sanitizedPhone,
+      password: passwordValidation.sanitizedInput
+    }
+    console.log("[LoginForm] submitting payload", { ...payload, password: "***" })
+    const result = await login(payload)
+    console.log("[LoginForm] login result", result)
+  }
+  
+  const handleSignupSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    clearMessages()
+    
+    if (!signupForm.firstName || !signupForm.lastName || !signupForm.phoneNumber || !signupForm.password) {
+      return
+    }
+
+    const firstNameValidation = validateName(signupForm.firstName)
+    if (!firstNameValidation.isValid) {
+      return
+    }
+
+    const lastNameValidation = validateName(signupForm.lastName)
+    if (!lastNameValidation.isValid) {
+      return
+    }
+
+    const phoneValidation = validatePhoneNumber(signupForm.phoneNumber)
+    if (!phoneValidation.isValid) {
+      return
+    }
+
+    const passwordStrengthValidation = validatePassword(signupForm.password)
+    if (!passwordStrengthValidation.isValid) {
+      return
+    }
+
+    const passwordSecurityValidation = validateFormInput(signupForm.password, "Password")
+    if (!passwordSecurityValidation.isValid) {
+      return
+    }
+    
+    const payload = {
+      firstName: firstNameValidation.sanitizedName,
+      lastName: lastNameValidation.sanitizedName,
+      phoneNumber: phoneValidation.sanitizedPhone,
+      password: passwordSecurityValidation.sanitizedInput
+    }
+    console.log("[SignupForm] submitting payload", { ...payload, password: "***" })
+    const result = await signup(payload)
+    console.log("[SignupForm] signup result", result)
+    
+    if (result.success) {
+      setTimeout(() => {
+        setActiveTab('login')
+        setLoginForm(prev => ({ ...prev, phoneNumber: signupForm.phoneNumber }))
+      }, 2000)
+    }
+  }
+
+  
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          {/* Tab Navigation */}
           <div className="p-6 md:p-8">
             <div className="flex mb-6 p-1 bg-muted rounded-lg">
               <button
@@ -153,8 +335,31 @@ export function LoginForm({
               </button>
             </div>
             
-            <form className="flex flex-col gap-6">
-              {activeTab === "login" ? <LoginFormContent /> : <SignupFormContent />}
+            <form 
+              className="flex flex-col gap-6"
+              onSubmit={activeTab === "login" ? handleLoginSubmit : handleSignupSubmit}
+            >
+              {activeTab === "login" ? (
+                <LoginFields
+                  loginForm={loginForm}
+                  setLoginForm={setLoginForm}
+                  isLoading={isLoading}
+                  onSwitchToSignup={() => {
+                    setActiveTab("signup")
+                    clearMessages()
+                  }}
+                />
+              ) : (
+                <SignupFields
+                  signupForm={signupForm}
+                  setSignupForm={setSignupForm}
+                  isLoading={isLoading}
+                  onSwitchToLogin={() => {
+                    setActiveTab("login")
+                    clearMessages()
+                  }}
+                />
+              )}
             </form>
           </div>
           
@@ -175,6 +380,21 @@ export function LoginForm({
         By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
         and <a href="#">Privacy Policy</a>.
       </div>
+      
+      {error && (
+        <Notification
+          type="error"
+          message={error}
+          onClose={clearMessages}
+        />
+      )}
+      {success && (
+        <Notification
+          type="success"
+          message={success}
+          onClose={clearMessages}
+        />
+      )}
     </div>
   )
 }
