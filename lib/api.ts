@@ -3,6 +3,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 export interface ApiResponse<T = unknown> {
   message: string;
   data?: T;
+  status: number;
+  ok: boolean;
 }
 
 export interface SignupRequest {
@@ -31,7 +33,6 @@ export interface LoginRequest {
 
 export interface LogoutResponse {
   status: string;
-  message: string;
 }
 
 export interface ForgotPasswordRequest {
@@ -49,7 +50,7 @@ export interface ResetPasswordRequest {
 
 async function apiCall<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<ApiResponse<T>> {
   const url = `${BASE_URL}${endpoint}`;
 
@@ -81,17 +82,32 @@ async function apiCall<T>(
         data.error ||
         response.statusText ||
         `Request failed with status ${response.status}`;
-      throw new Error(errorMessage);
+      console.log(`❌ API Error:`, errorMessage);
+
+      return {
+        ...data,
+        status: response.status,
+        ok: false,
+        message: errorMessage,
+      };
     }
 
-    return data;
+    return {
+      ...data,
+      status: response.status,
+      ok: true,
+    };
   } catch (error) {
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error(
-      "Network error occurred. Please check your connection and try again."
-    );
+    console.log(`💥 API Call Failed:`, error);
+
+    return {
+      message:
+        error instanceof Error
+          ? error.message
+          : "Network error occurred. Please check your connection and try again.",
+      status: 0,
+      ok: false,
+    };
   }
 }
 
@@ -134,6 +150,18 @@ export const authApi = {
     return apiCall("/auth/vendors/reset-password", {
       method: "POST",
       body: JSON.stringify(data),
+    });
+  },
+
+  async redeemDigitalHandle(digitalHandle: string): Promise<ApiResponse> {
+    return apiCall(`/user/redeem/${digitalHandle}`, {
+      method: "PATCH",
+    });
+  },
+
+  async refreshToken(): Promise<ApiResponse> {
+    return apiCall("/auth/vendors/refresh", {
+      method: "POST",
     });
   },
 };
