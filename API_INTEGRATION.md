@@ -3,6 +3,7 @@
 ## Environment Setup
 
 Add the following to your `.env` file:
+
 ```
 NEXT_PUBLIC_BASE_URL="https://3d128z4j-3001.inc1.devtunnels.ms/api/v1"
 ```
@@ -12,6 +13,7 @@ NEXT_PUBLIC_BASE_URL="https://3d128z4j-3001.inc1.devtunnels.ms/api/v1"
 ### Authentication
 
 #### Signup
+
 - **Endpoint**: `POST /auth/vendors/signup`
 - **Body**:
   ```json
@@ -47,6 +49,7 @@ NEXT_PUBLIC_BASE_URL="https://3d128z4j-3001.inc1.devtunnels.ms/api/v1"
   ```
 
 #### Login
+
 - **Endpoint**: `POST /auth/vendors/login`
 - **Body**:
   ```json
@@ -56,11 +59,13 @@ NEXT_PUBLIC_BASE_URL="https://3d128z4j-3001.inc1.devtunnels.ms/api/v1"
   }
   ```
 - **Success Response** (200):
+
   ```json
   {
     "message": "You have logged in successfully"
   }
   ```
+
   - **Headers**: Authentication cookies are set automatically
     - `access_token=eyJhbGciOi...; HttpOnly; Secure; SameSite=None; Path=/`
     - `refresh_token=eyJhbGciOi...; HttpOnly; Secure; SameSite=None; Path=/`
@@ -73,6 +78,7 @@ NEXT_PUBLIC_BASE_URL="https://3d128z4j-3001.inc1.devtunnels.ms/api/v1"
   ```
 
 #### Logout
+
 - **Endpoint**: `POST /auth/vendors/logout`
 - **Body**: None required
 - **Success Response** (200):
