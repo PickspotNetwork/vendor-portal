@@ -16,7 +16,7 @@ export function useAuth() {
     error: null,
     success: null,
   });
-  const [accessToken] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const clearMessages = () => {
     setAuthState((prev) => ({ ...prev, error: null, success: null }));
@@ -68,10 +68,11 @@ export function useAuth() {
       });
 
       initializeAuth();
-
+      
       setTimeout(() => {
         router.push("/dashboard");
-      }, 200);
+        router.refresh(); 
+      }, 500);
 
       return { success: true, data: response };
     } catch (error) {
@@ -117,7 +118,7 @@ export function useAuth() {
   };
 
   return {
-    accessToken,
+    accessToken, setAccessToken,
     ...authState,
     signup,
     login,

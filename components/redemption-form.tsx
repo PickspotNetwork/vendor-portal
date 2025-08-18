@@ -9,6 +9,7 @@ import { Notification } from "@/components/ui/notification";
 
 import { validateFormInput } from "@/lib/input-sanitization";
 import { forceTokenRefresh, getTokenStatus } from "@/utils/authService";
+import { refreshRedemptionsList } from "@/components/recent-redemptions";
 import { Loader2, Search, CheckCircle, X, AlertCircle } from "lucide-react";
 
 interface RedemptionResult {
@@ -152,6 +153,7 @@ export default function RedemptionForm() {
       });
       setShowModal(true);
       setDigitalHandle("");
+      refreshRedemptionsList();
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to redeem digital handle";
