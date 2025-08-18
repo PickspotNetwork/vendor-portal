@@ -27,10 +27,25 @@ interface ApiResponse {
   redeemedUsers: RedeemedUser[];
 }
 
+const refreshRedemptionsRef = { current: null as (() => void) | null };
+
+export const refreshRedemptionsList = () => {
+  if (refreshRedemptionsRef.current) {
+    refreshRedemptionsRef.current();
+  }
+};
+
 export default function RecentRedemptions() {
   const [redeemedUsers, setRedeemedUsers] = useState<RedeemedUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    refreshRedemptionsRef.current = fetchRedeemedUsers;
+    return () => {
+      refreshRedemptionsRef.current = null;
+    };
+  }, []);
 
   const fetchRedeemedUsers = async () => {
     try {
@@ -81,7 +96,10 @@ export default function RecentRedemptions() {
 
             const retryData: ApiResponse = await retryResponse.json();
 
-            setRedeemedUsers(retryData.redeemedUsers || []);
+            const sortedRetryUsers = (retryData.redeemedUsers || []).sort((a, b) => {
+              return new Date(b.redeemedAt).getTime() - new Date(a.redeemedAt).getTime();
+            });
+            setRedeemedUsers(sortedRetryUsers);
             return;
           } else {
             setError("Session expired. Please log in again.");
@@ -91,7 +109,10 @@ export default function RecentRedemptions() {
         console.log(data.message || "Failed to fetch redeemed users");
       }
 
-      setRedeemedUsers(data.redeemedUsers || []);
+      const sortedUsers = (data.redeemedUsers || []).sort((a, b) => {
+        return new Date(b.redeemedAt).getTime() - new Date(a.redeemedAt).getTime();
+      });
+      setRedeemedUsers(sortedUsers);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to fetch redeemed users";

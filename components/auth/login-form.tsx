@@ -302,12 +302,8 @@ export function LoginForm({
       phoneNumber: phoneValidation.sanitizedPhone,
       password: passwordValidation.sanitizedInput,
     };
-    console.log("[LoginForm] submitting payload", {
-      ...payload,
-      password: "***",
-    });
     const result = await login(payload);
-    console.log("[LoginForm] login result", result);
+    console.log("Login result", result);
   };
 
   const handleSignupSubmit = async (e: FormEvent) => {
