@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authApi, SignupRequest, LoginRequest } from "@/lib/api";
-import { initializeAuth, cleanupAuth } from "@/utils/authService";
+import { cleanupAuth } from "@/utils/authService";
 
 export interface AuthState {
   isLoading: boolean;
@@ -61,29 +61,10 @@ export function useAuth() {
         return { success: false, error: response.message || "Login failed" };
       }
 
-      setAuthState({
-        isLoading: true,
-        error: null,
-        success: response.message || "Logging in...",
-      });
-
-      initializeAuth();
-      
-      // Wait longer and verify cookies before redirect
-      setTimeout(async () => {
-        if (process.env.NODE_ENV === 'production') {
-          // In production, trust the login success and redirect
-          // In development, verify cookie exists
-          router.push("/dashboard");
-          router.refresh();
-        } else {
-          // If no cookies after delay, try again with longer wait
-          setTimeout(() => {
-            router.push("/dashboard");
-            router.refresh();
-          }, 1000);
-        }
-      }, 1000); // Increased delay for cookie propagation
+      // router.push("/dashboard");
+      // router.refresh();
+      // window.location.href = '/dashboard'
+      window.location.reload();
 
       return { success: true, data: response };
     } catch (error) {
