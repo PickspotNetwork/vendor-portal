@@ -63,8 +63,8 @@ export function useAuth() {
 
       // router.push("/dashboard");
       // router.refresh();
-      // window.location.href = '/dashboard'
-      window.location.reload();
+      // window.location.reload();
+      window.location.href = '/dashboard'
 
       return { success: true, data: response };
     } catch (error) {
