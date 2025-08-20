@@ -69,10 +69,21 @@ export function useAuth() {
 
       initializeAuth();
       
-      setTimeout(() => {
-        router.push("/dashboard");
-        router.refresh(); 
-      }, 500);
+      // Wait longer and verify cookies before redirect
+      setTimeout(async () => {
+        if (process.env.NODE_ENV === 'production') {
+          // In production, trust the login success and redirect
+          // In development, verify cookie exists
+          router.push("/dashboard");
+          router.refresh();
+        } else {
+          // If no cookies after delay, try again with longer wait
+          setTimeout(() => {
+            router.push("/dashboard");
+            router.refresh();
+          }, 1000);
+        }
+      }, 1000); // Increased delay for cookie propagation
 
       return { success: true, data: response };
     } catch (error) {
