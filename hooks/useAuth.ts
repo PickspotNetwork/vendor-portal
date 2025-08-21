@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authApi, SignupRequest, LoginRequest } from "@/lib/api";
-import { cleanupAuth } from "@/utils/authService";
+import { cleanupAuth, initializeAuth } from "@/utils/authService";
 
 export interface AuthState {
   isLoading: boolean;
@@ -61,10 +61,15 @@ export function useAuth() {
         return { success: false, error: response.message || "Login failed" };
       }
 
-      // router.push("/dashboard");
-      // router.refresh();
-      // window.location.reload();
-      window.location.href = '/dashboard'
+      // Initialize background token refresh and route to dashboard
+      initializeAuth();
+      setAuthState({
+        isLoading: false,
+        error: null,
+        success: response.message || "Logged in successfully",
+      });
+      router.replace("/dashboard");
+      router.refresh();
 
       return { success: true, data: response };
     } catch (error) {
