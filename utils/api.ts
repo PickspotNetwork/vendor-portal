@@ -1,9 +1,9 @@
 import { refreshToken } from "./authService";
+import Cookies from "js-cookie";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 export async function apiFetch(
-  access_token: string | null,
   url: string,
   options: RequestInit = {},
 ) {
@@ -12,8 +12,9 @@ export async function apiFetch(
     ...((options.headers as Record<string, string>) || {}),
   };
 
-  if (access_token) {
-    headers["Authorization"] = `Bearer ${access_token}`;
+  const accessToken = Cookies.get("accessToken");
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
   }
 
   let response = await fetch(`${apiBaseUrl}${url}`, {

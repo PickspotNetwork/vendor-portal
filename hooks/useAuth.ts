@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authApi, SignupRequest, LoginRequest } from "@/lib/api";
 import { cleanupAuth, initializeAuth } from "@/utils/authService";
+import { useUser } from "@/context/UserContext";
 
 export interface AuthState {
   isLoading: boolean;
@@ -11,12 +12,12 @@ export interface AuthState {
 
 export function useAuth() {
   const router = useRouter();
+  const { logout: contextLogout } = useUser();
   const [authState, setAuthState] = useState<AuthState>({
     isLoading: false,
     error: null,
     success: null,
   });
-  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const clearMessages = () => {
     setAuthState((prev) => ({ ...prev, error: null, success: null }));
@@ -61,13 +62,13 @@ export function useAuth() {
         return { success: false, error: response.message || "Login failed" };
       }
 
-      // Initialize background token refresh and route to dashboard
       initializeAuth();
       setAuthState({
         isLoading: false,
         error: null,
         success: response.message || "Logged in successfully",
       });
+      
       router.replace("/dashboard");
       router.refresh();
 
@@ -94,13 +95,10 @@ export function useAuth() {
         error: null,
         success: response.message || "Logging out...",
       });
-
+      
       cleanupAuth();
-
-      setTimeout(() => {
-        router.push("/");
-      }, 500);
-
+      contextLogout();
+      
       return { success: true, data: response };
     } catch (error) {
       const errorMessage =
@@ -115,7 +113,6 @@ export function useAuth() {
   };
 
   return {
-    accessToken, setAccessToken,
     ...authState,
     signup,
     login,

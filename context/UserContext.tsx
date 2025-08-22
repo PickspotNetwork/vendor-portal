@@ -25,6 +25,7 @@ interface User {
 interface UserContextType {
   user: User | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  logout: () => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -36,11 +37,17 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const router = useRouter();
 
   useEffect(() => {
-    const access_token = Cookies.get("access_token");
+    const accessToken = Cookies.get("accessToken");
 
-    if (access_token) {
+    if (!accessToken) {
+      console.warn("No access token found. Redirecting to login.");
+      router.push("/login");
+      return;
+    }
+
+    if (accessToken) {
       try {
-        const decodedToken = jwtDecode<CustomJwtPayload>(access_token);
+        const decodedToken = jwtDecode<CustomJwtPayload>(accessToken);
 
         const userData = {
           vendorId: decodedToken.vendorId,
@@ -53,17 +60,25 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         setUser(userData);
       } catch (error) {
         console.log("Error decoding token:", error);
-        Cookies.remove("access_token");
+        Cookies.remove("accessToken");
+        router.push("/login");
         setUser(null);
       }
     }
   }, [router]);
+
+  const logout = () => {
+    Cookies.remove("accessToken");
+    setUser(null);
+    router.push("/login");
+  };
 
   return (
     <UserContext.Provider
       value={{
         user,
         setUser,
+        logout,
       }}
     >
       {children}
