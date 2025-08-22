@@ -31,6 +31,11 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface LoginResponse {
+  message: string;
+  accessToken: string;
+}
+
 export interface LogoutResponse {
   status: string;
 }
@@ -119,8 +124,8 @@ export const authApi = {
     });
   },
 
-  async login(credentials: LoginRequest): Promise<ApiResponse> {
-    return apiCall("/auth/vendors/login", {
+  async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
+    return apiCall<LoginResponse>("/auth/vendors/login", {
       method: "POST",
       body: JSON.stringify(credentials),
     });
