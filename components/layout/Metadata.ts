@@ -1,13 +1,13 @@
 import type { Metadata, Viewport } from "next";
 
 const description =
-  "Access your Pickspot vendor dashboard to manage deliveries, track orders, and grow your business with smart locker solutions across Africa.";
-const url = "https://vendor.pickspot.world";
+  "Access your Pickspot Vendor Dashboard to manage redemptions, redeem handles, and earn money for every digital handle redeemed.";
+const url = "https://vendor.dropoff.co.ke";
 const icon = "/icons/android-chrome-512x512.png";
 const image = "/images/post.png";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://vendor.pickspot.world"),
+  metadataBase: new URL(url),
   title: {
     default: "Pickspot Vendor Portal",
     template: "%s | Pickspot Vendor Portal",
@@ -40,10 +40,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://vendor.pickspot.world",
+    url,
     title: "Pickspot Vendor Portal",
-    description:
-      "Manage your deliveries and grow your business with Pickspot's smart locker network across Africa.",
+    description,
     siteName: "Pickspot Vendor Portal",
     images: [
       {
@@ -57,8 +56,7 @@ export const metadata: Metadata = {
   twitter: {
     card: image ? "summary_large_image" : "summary",
     title: "Pickspot Vendor Portal",
-    description:
-      "Manage your deliveries and grow your business with Pickspot's smart locker network.",
+    description,
     creator: "@PickspotNetwork",
     images: [image],
   },
@@ -82,7 +80,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Pickspot Vendor",
+    title: "Pickspot Vendor Portal",
   },
   formatDetection: {
     telephone: false,

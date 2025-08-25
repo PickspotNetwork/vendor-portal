@@ -21,7 +21,7 @@ export default function MainLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans w-full min-h-screen h-auto`}
       >
         {children}
       </body>

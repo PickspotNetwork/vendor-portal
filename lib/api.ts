@@ -36,10 +36,6 @@ export interface LoginResponse {
   accessToken: string;
 }
 
-export interface LogoutResponse {
-  status: string;
-}
-
 export interface ForgotPasswordRequest {
   phoneNumber: string;
 }
@@ -87,7 +83,7 @@ async function apiCall<T>(
         data.error ||
         response.statusText ||
         `Request failed with status ${response.status}`;
-      console.log(`❌ API Error:`, errorMessage);
+      console.log(`API Error:`, errorMessage);
 
       return {
         ...data,
@@ -103,7 +99,7 @@ async function apiCall<T>(
       ok: true,
     };
   } catch (error) {
-    console.log(`💥 API Call Failed:`, error);
+    console.log(`API Call Failed:`, error);
 
     return {
       message:
@@ -128,12 +124,6 @@ export const authApi = {
     return apiCall<LoginResponse>("/auth/vendors/login", {
       method: "POST",
       body: JSON.stringify(credentials),
-    });
-  },
-
-  async logout(): Promise<ApiResponse<LogoutResponse>> {
-    return apiCall<LogoutResponse>("/auth/vendors/logout", {
-      method: "POST",
     });
   },
 
