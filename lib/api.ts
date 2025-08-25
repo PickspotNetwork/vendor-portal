@@ -36,6 +36,11 @@ export interface LoginResponse {
   accessToken: string;
 }
 
+export interface LogoutResponse {
+  status: string;
+  message: string;
+}
+
 export interface ForgotPasswordRequest {
   phoneNumber: string;
 }
@@ -124,6 +129,12 @@ export const authApi = {
     return apiCall<LoginResponse>("/auth/vendors/login", {
       method: "POST",
       body: JSON.stringify(credentials),
+    });
+  },
+
+  async logout(): Promise<ApiResponse<LogoutResponse>> {
+    return apiCall<LogoutResponse>("/auth/vendors/logout", {
+      method: "POST",
     });
   },
 
