@@ -7,11 +7,13 @@ import { LogOut, Loader2, User, Settings, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useUser } from "@/context/UserContext";
+import { authApi } from "@/lib/api";
 
 export default function Header() {
-  const { user, logout } = useUser();
+  const { user, logout: userContextLogout } = useUser();
   const { isLoading } = useAuth();
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,6 +29,19 @@ export default function Header() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.error("API logout failed:", error);
+    } finally {
+      userContextLogout();
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <header className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
@@ -93,11 +108,11 @@ export default function Header() {
 
               <div className="border-t border-gray-100 py-1">
                 <button
-                  onClick={logout}
-                  disabled={isLoading}
+                  onClick={handleLogout}
+                  disabled={isLoading || isLoggingOut}
                   className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
                 >
-                  {isLoading ? (
+                  {isLoading || isLoggingOut ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
                       Logging out...
