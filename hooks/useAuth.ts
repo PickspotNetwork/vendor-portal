@@ -1,8 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { authApi, SignupRequest, LoginRequest } from "@/lib/api";
-import { cleanupAuth, initializeAuth } from "@/utils/authService";
-import { useUser } from "@/context/UserContext";
+import {
+  authApi,
+  SignupRequest,
+  LoginRequest,
+  ApiResponse,
+  LoginResponse,
+} from "@/lib/api";
+import Cookies from "js-cookie";
+import { refreshToken } from "@/utils/authService";
 
 export interface AuthState {
   isLoading: boolean;
@@ -12,12 +18,30 @@ export interface AuthState {
 
 export function useAuth() {
   const router = useRouter();
-  const { logout: contextLogout } = useUser();
   const [authState, setAuthState] = useState<AuthState>({
     isLoading: false,
     error: null,
     success: null,
   });
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      const existingToken = Cookies.get("accessToken");
+
+      if (existingToken) {
+        const newAccessToken = await refreshToken();
+        if (newAccessToken) {
+          setAccessToken(newAccessToken);
+        }
+      }
+    };
+
+    fetchToken();
+    const interval = setInterval(fetchToken, 13 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const clearMessages = () => {
     setAuthState((prev) => ({ ...prev, error: null, success: null }));
@@ -56,21 +80,34 @@ export function useAuth() {
       if (!response.ok || response.status !== 200) {
         setAuthState({
           isLoading: false,
-          error: response.message || "Login failed",
+          error: response.message || "Invalid credentials. Please try again.",
           success: null,
         });
         return { success: false, error: response.message || "Login failed" };
       }
 
-      initializeAuth();
+      const accessToken =
+        "accessToken" in response
+          ? (response as ApiResponse<LoginResponse> & { accessToken: string })
+              .accessToken
+          : response.data?.accessToken;
+
+      if (accessToken) {
+        Cookies.set("accessToken", accessToken, {
+          expires: 7,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "Strict",
+          path: "/",
+        });
+      }
+
       setAuthState({
         isLoading: false,
         error: null,
-        success: response.message || "Logged in successfully",
+        success: response.message || "Login successful",
       });
-      
-      router.replace("/dashboard");
-      router.refresh();
+
+      router.push("/dashboard");
 
       return { success: true, data: response };
     } catch (error) {
@@ -85,38 +122,11 @@ export function useAuth() {
     }
   };
 
-  const logout = async () => {
-    setAuthState({ isLoading: true, error: null, success: null });
-
-    try {
-      const response = await authApi.logout();
-      setAuthState({
-        isLoading: true,
-        error: null,
-        success: response.message || "Logging out...",
-      });
-      
-      cleanupAuth();
-      contextLogout();
-      
-      return { success: true, data: response };
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Logout failed";
-      setAuthState({
-        isLoading: false,
-        error: errorMessage,
-        success: null,
-      });
-      return { success: false, error: errorMessage };
-    }
-  };
-
   return {
     ...authState,
+    accessToken,
     signup,
     login,
-    logout,
     clearMessages,
   };
 }

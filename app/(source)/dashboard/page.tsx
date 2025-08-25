@@ -1,18 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Notification } from "@/components/ui/notification";
 import RedemptionForm from "@/components/redemption-form";
 import RecentRedemptions from "@/components/recent-redemptions";
-import { initializeAuth } from "@/utils/authService";
 
 export default function Dashboard() {
   const { error, success, clearMessages } = useAuth();
-
-  useEffect(() => {
-    initializeAuth();
-  }, []);
 
   return (
     <>

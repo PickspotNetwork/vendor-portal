@@ -41,7 +41,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (!accessToken) {
       console.warn("No access token found. Redirecting to login.");
-      router.push("/login");
+      router.push("/");
       return;
     }
 
@@ -61,7 +61,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       } catch (error) {
         console.log("Error decoding token:", error);
         Cookies.remove("accessToken");
-        router.push("/login");
+        router.push("/");
         setUser(null);
       }
     }
@@ -69,8 +69,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = () => {
     Cookies.remove("accessToken");
+    Cookies.remove("refresh_token");
     setUser(null);
-    router.push("/login");
+    router.push("/");
   };
 
   return (

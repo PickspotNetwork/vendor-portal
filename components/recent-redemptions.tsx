@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Cookies from "js-cookie";
 import { DollarSign, User, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { forceTokenRefresh, getTokenStatus } from "@/utils/authService";
+import { refreshToken } from "@/utils/authService";
+import { useRouter } from "next/navigation";
 
 interface RedeemedUser {
   _id: string;
@@ -39,92 +40,101 @@ export default function RecentRedemptions() {
   const [redeemedUsers, setRedeemedUsers] = useState<RedeemedUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const router = useRouter();
+
+  const fetchRedeemedUsers = useCallback(async () => {
+    setIsLoading(true);
+    setError("");
+
+    const accessToken = Cookies.get("accessToken");
+
+    if (!accessToken) {
+      setError("Access token not found");
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchRedeemed = async (token: string) => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/user/all-redeemed-users`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+        if (response.status === 401) return null;
+
+        if (!response.ok) {
+          setError("Error fetching recent deliveries");
+          return null;
+        }
+
+        const data: ApiResponse = await response.json();
+        return data;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Failed to fetch recent deliveries";
+        setError(errorMessage);
+        router.push("/");
+        return null;
+      }
+    };
+
+    try {
+      let data = await fetchRedeemed(accessToken);
+
+      if (!data) {
+        const newAccessToken = await refreshToken();
+
+        if (newAccessToken) {
+          Cookies.set("accessToken", newAccessToken);
+          data = await fetchRedeemed(newAccessToken);
+        } else {
+          setError("Session expired");
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      if (data && data.redeemedUsers) {
+        const sortedUsers = data.redeemedUsers.sort((a, b) => {
+          return (
+            new Date(b.redeemedAt).getTime() - new Date(a.redeemedAt).getTime()
+          );
+        });
+        setRedeemedUsers(sortedUsers);
+      } else {
+        setError("Failed to fetch redemption data");
+        setRedeemedUsers([]);
+      }
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to fetch recent deliveries";
+      setError(errorMessage);
+      router.push("/");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [router]);
 
   useEffect(() => {
     refreshRedemptionsRef.current = fetchRedeemedUsers;
     return () => {
       refreshRedemptionsRef.current = null;
     };
-  }, []);
-
-  const fetchRedeemedUsers = async () => {
-    try {
-      setIsLoading(true);
-      setError("");
-
-      const tokenStatus = getTokenStatus();
-      if (tokenStatus.needsRefresh) {
-        const refreshSuccess = await forceTokenRefresh();
-        if (!refreshSuccess) {
-          setError("Session expired. Please log in again.");
-          return;
-        }
-      }
-
-      const accessToken = Cookies.get("access_token");
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/user/all-redeemed-users`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        },
-      );
-
-      const data: ApiResponse = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          const refreshSuccess = await forceTokenRefresh();
-          if (refreshSuccess) {
-            const newAccessToken = Cookies.get("access_token");
-            const retryResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_BASE_URL}/user/all-redeemed-users`,
-              {
-                method: "GET",
-                headers: {
-                  Authorization: `Bearer ${newAccessToken}`,
-                  "Content-Type": "application/json",
-                },
-                credentials: "include",
-              },
-            );
-
-            const retryData: ApiResponse = await retryResponse.json();
-
-            const sortedRetryUsers = (retryData.redeemedUsers || []).sort((a, b) => {
-              return new Date(b.redeemedAt).getTime() - new Date(a.redeemedAt).getTime();
-            });
-            setRedeemedUsers(sortedRetryUsers);
-            return;
-          } else {
-            setError("Session expired. Please log in again.");
-            return;
-          }
-        }
-        console.log(data.message || "Failed to fetch redeemed users");
-      }
-
-      const sortedUsers = (data.redeemedUsers || []).sort((a, b) => {
-        return new Date(b.redeemedAt).getTime() - new Date(a.redeemedAt).getTime();
-      });
-      setRedeemedUsers(sortedUsers);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to fetch redeemed users";
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [fetchRedeemedUsers]);
 
   useEffect(() => {
     fetchRedeemedUsers();
-  }, []);
+  }, [fetchRedeemedUsers]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

@@ -2,13 +2,13 @@
 
 import { useState, FormEvent } from "react";
 import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Notification } from "@/components/ui/notification";
-
 import { validateFormInput } from "@/lib/input-sanitization";
-import { forceTokenRefresh, getTokenStatus } from "@/utils/authService";
+import { refreshToken } from "@/utils/authService";
 import { refreshRedemptionsList } from "@/components/recent-redemptions";
 import { Loader2, Search, CheckCircle, X, AlertCircle } from "lucide-react";
 
@@ -22,6 +22,7 @@ interface RedemptionResult {
 }
 
 export default function RedemptionForm() {
+  const router = useRouter();
   const [digitalHandle, setDigitalHandle] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -82,82 +83,110 @@ export default function RedemptionForm() {
     setSuccess("");
     setRedeemResult(null);
 
+    const accessToken = Cookies.get("accessToken");
+
+    if (!accessToken) {
+      setError("Access token not found");
+      setIsLoading(false);
+      return;
+    }
+    const redeemHandle = async (token: string) => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/user/redeem/${digitalHandle.trim()}`,
+          {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+        if (response.status === 401) return null;
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            setRedeemResult({
+              digitalHandle: digitalHandle.trim(),
+              status: "not_found",
+              message:
+                data.err ||
+                data.message ||
+                "This user hasn't acquired a digital handle yet",
+              userId: undefined,
+            });
+          } else if (
+            response.status === 400 &&
+            (data.err === "User is already redeemed" ||
+              data.message?.includes("already redeemed"))
+          ) {
+            setRedeemResult({
+              digitalHandle: digitalHandle.trim(),
+              status: "already_redeemed",
+              message: "User has already been redeemed",
+              userId: undefined,
+            });
+          } else {
+            setRedeemResult({
+              digitalHandle: digitalHandle.trim(),
+              status: "error",
+              message:
+                data.err || data.message || "Failed to redeem digital handle",
+              userId: undefined,
+            });
+          }
+          setShowModal(true);
+          setDigitalHandle("");
+          return;
+        }
+
+        setRedeemResult({
+          digitalHandle: digitalHandle.trim(),
+          status: "success",
+          message: data.message || "User was redeemed successfully",
+          userId: data.redeemedUser?._id,
+          timestamp: data.redeemedUser?.redeemedAt,
+        });
+        setShowModal(true);
+        setDigitalHandle("");
+        refreshRedemptionsList();
+
+        return await response.json();
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Failed to redeem digital handle";
+        setError(errorMessage);
+        router.push("/");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     try {
-      const tokenStatus = getTokenStatus();
-      if (tokenStatus.needsRefresh || tokenStatus.timeUntilExpiry < 60000) {
-        const refreshSuccess = await forceTokenRefresh();
-        if (!refreshSuccess) {
-          setError("Session expired. Please log in again.");
+      let data = await redeemHandle(accessToken);
+
+      if (!data) {
+        const newAccessToken = await refreshToken();
+
+        if (newAccessToken) {
+          Cookies.set("accessToken", newAccessToken);
+          data = await redeemHandle(newAccessToken);
+        } else {
+          setError("Session expired");
+          setIsLoading(false);
           return;
         }
       }
-
-      const accessToken = Cookies.get("access_token");
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/user/redeem/${digitalHandle.trim()}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          credentials: "include",
-        },
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred.",
       );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          setRedeemResult({
-            digitalHandle: digitalHandle.trim(),
-            status: "not_found",
-            message:
-              data.err ||
-              data.message ||
-              "This user hasn't acquired a digital handle yet",
-            userId: undefined,
-          });
-        } else if (
-          response.status === 400 &&
-          (data.err === "User is already redeemed" ||
-            data.message?.includes("already redeemed"))
-        ) {
-          setRedeemResult({
-            digitalHandle: digitalHandle.trim(),
-            status: "already_redeemed",
-            message: "User has already been redeemed",
-            userId: undefined,
-          });
-        } else {
-          setRedeemResult({
-            digitalHandle: digitalHandle.trim(),
-            status: "error",
-            message:
-              data.err || data.message || "Failed to redeem digital handle",
-            userId: undefined,
-          });
-        }
-        setShowModal(true);
-        setDigitalHandle("");
-        return;
-      }
-
-      setRedeemResult({
-        digitalHandle: digitalHandle.trim(),
-        status: "success",
-        message: data.message || "User was redeemed successfully",
-        userId: data.redeemedUser?._id,
-        timestamp: data.redeemedUser?.redeemedAt,
-      });
-      setShowModal(true);
-      setDigitalHandle("");
-      refreshRedemptionsList();
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to redeem digital handle";
-      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
