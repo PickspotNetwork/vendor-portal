@@ -182,7 +182,7 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
                         <User className="h-4 w-4 text-gray-600" />
                       </div>
                       <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-gray-900 capitalize">
                           {vendor.firstName} {vendor.lastName}
                         </p>
                         <p className="text-xs text-gray-500 font-mono">{vendor._id}</p>

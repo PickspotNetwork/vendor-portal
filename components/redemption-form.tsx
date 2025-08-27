@@ -93,7 +93,7 @@ export default function RedemptionForm() {
     const redeemHandle = async (token: string) => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/user/redeem/${digitalHandle.trim()}`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/user/redeem/${digitalHandle.trim().toLowerCase()}`,
           {
             method: "PATCH",
             headers: {
