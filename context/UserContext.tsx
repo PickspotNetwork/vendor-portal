@@ -58,6 +58,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         };
 
         setUser(userData);
+
+        const currentPath = window.location.pathname;
+        if (decodedToken.role === "admin" && currentPath === "/dashboard") {
+          router.push("/admin");
+        } else if (decodedToken.role === "vendor" && currentPath === "/admin") {
+          router.push("/dashboard");
+        }
       } catch (error) {
         console.log("Error decoding token:", error);
         Cookies.remove("accessToken");

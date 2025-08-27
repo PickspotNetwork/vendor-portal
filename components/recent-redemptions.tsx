@@ -211,7 +211,7 @@ export default function RecentRedemptions() {
         </div>
 
         <div className="bg-black text-white rounded-xl p-4 border border-[#D62E1F]/20">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-1">
             <div>
               <p className="text-xs uppercase tracking-wide font-medium">
                 Amount Earned
@@ -224,6 +224,21 @@ export default function RecentRedemptions() {
               <div className="w-12 h-12 bg-[#D62E1F]/10 rounded-full flex items-center justify-center">
                 <DollarSign className="h-6 w-6 text-white" />
               </div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-700">
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wide">Paid</p>
+              <p className="text-sm font-semibold text-white">
+                KSh {(redeemedUsers.filter(user => user.isPaid).length * 50).toLocaleString()}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wide">Unpaid</p>
+              <p className="text-sm font-semibold text-[#d62e1f]">
+                KSh {(redeemedUsers.filter(user => !user.isPaid).length * 50).toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -244,7 +259,7 @@ export default function RecentRedemptions() {
                   {user._id}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
-                  {user.firstName} {user.lastName}
+                  {user.phoneNumber}
                 </p>
               </div>
             </div>
@@ -257,7 +272,7 @@ export default function RecentRedemptions() {
                     <span className="text-xs font-medium">Paid</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1 text-gray-500">
+                  <div className="flex items-center gap-1 text-[#d62e1f]">
                     <DollarSign className="h-3 w-3" />
                     <span className="text-xs font-medium">Unpaid</span>
                   </div>
@@ -271,7 +286,7 @@ export default function RecentRedemptions() {
                 {user.isPaid ? (
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 ) : (
-                  <div className="w-2 h-2 bg-red-700 rounded-full"></div>
+                  <div className="w-2 h-2 bg-[#d62e1f] rounded-full"></div>
                 )}
               </div>
             </div>

@@ -11,11 +11,7 @@ import { useState, FormEvent, Dispatch, SetStateAction } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import {
-  validateFormInput,
-  validatePhoneNumber,
-  validateName,
-} from "@/lib/input-sanitization";
+import { validateFormInput, validatePhoneNumber, validateName, } from "@/lib/input-sanitization";
 import { validatePassword } from "@/lib/password-validation";
 import { PasswordStrength } from "@/components/auth/password-strength";
 
@@ -57,7 +53,7 @@ function LoginFields({
         <Input
           id="login-phone"
           type="tel"
-          placeholder="0708575242"
+          placeholder="0701234567"
           value={loginForm.phoneNumber}
           onChange={(e) =>
             setLoginForm((prev) => ({ ...prev, phoneNumber: e.target.value }))

@@ -21,7 +21,7 @@ export default function SettingsPage() {
     <div className="max-w-4xl mx-auto">
       <div className="mb-2">
         <Link
-          href="/dashboard"
+          href={user?.role === "admin" ? "/admin" : "/dashboard"}
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#D62E1F] hover:bg-gray-50 rounded-lg transition-all duration-200 group"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />

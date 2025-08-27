@@ -60,12 +60,17 @@ export function ForgotPasswordForm({
       const response = await authApi.forgotPassword({
         phoneNumber: phoneValidation.sanitizedPhone,
       });
-      setSuccess(response.message || "Reset code sent to your phone");
-      setPhoneNumber(phoneValidation.sanitizedPhone);
-      setTimeout(() => {
-        setCurrentStep("code");
-        setSuccess(null);
-      }, 2000);
+      
+      if (response.ok) {
+        setSuccess(response.message || "Reset code sent to your phone");
+        setPhoneNumber(phoneValidation.sanitizedPhone);
+        setTimeout(() => {
+          setCurrentStep("code");
+          setSuccess(null);
+        }, 1000);
+      } else {
+        setError(response.message || "Failed to send reset code");
+      }
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Failed to send reset code",
@@ -87,11 +92,16 @@ export function ForgotPasswordForm({
     setIsLoading(true);
     try {
       const response = await authApi.verifyResetCode({ resetCode });
-      setSuccess(response.message || "Code verified successfully");
-      setTimeout(() => {
-        setCurrentStep("password");
-        setSuccess(null);
-      }, 1500);
+      
+      if (response.ok) {
+        setSuccess(response.message || "Code verified successfully");
+        setTimeout(() => {
+          setCurrentStep("password");
+          setSuccess(null);
+        }, 1500);
+      } else {
+        setError(response.message || "Invalid reset code");
+      }
     } catch (error) {
       setError(error instanceof Error ? error.message : "Invalid reset code");
     } finally {
@@ -200,7 +210,7 @@ export function ForgotPasswordForm({
               <Input
                 id="phone"
                 type="tel"
-                placeholder="0708575242"
+                placeholder="0701234567"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 required

@@ -279,7 +279,7 @@ export default function RedemptionForm() {
                           Already Redeemed
                         </h3>
                         <p className="text-gray-600 text-sm leading-relaxed">
-                          This user has already been redeemed by your business
+                          This user has already been redeemed.
                         </p>
                       </>
                     ) : redeemResult.status === "error" ? (

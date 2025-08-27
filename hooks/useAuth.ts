@@ -9,6 +9,8 @@ import {
 } from "@/lib/api";
 import Cookies from "js-cookie";
 import { refreshToken } from "@/utils/authService";
+import { jwtDecode } from "jwt-decode";
+import { CustomJwtPayload } from "@/types/auth";
 
 export interface AuthState {
   isLoading: boolean;
@@ -107,7 +109,21 @@ export function useAuth() {
         success: response.message || "Login successful",
       });
 
-      router.push("/dashboard");
+      try {
+        if (accessToken) {
+          const decodedToken = jwtDecode<CustomJwtPayload>(accessToken);
+          if (decodedToken.role === "admin") {
+            router.push("/admin");
+          } else {
+            router.push("/dashboard");
+          }
+        } else {
+          router.push("/dashboard");
+        }
+      } catch (error) {
+        console.error("Error decoding token for routing:", error);
+        router.push("/dashboard");
+      }
 
       return { success: true, data: response };
     } catch (error) {

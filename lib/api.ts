@@ -54,6 +54,52 @@ export interface ResetPasswordRequest {
   newPassword: string;
 }
 
+export interface Vendor {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VendorsResponse {
+  msg: string;
+  data: Vendor[];
+}
+
+export interface RedeemedUser {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  isRedeemed: boolean;
+  isPaid: boolean;
+  redeemedAt: string;
+  vendor: string;
+  rewards?: {
+    rewarded: boolean;
+    totalPoints: number;
+  };
+}
+
+export interface RedeemedUsersResponse {
+  message: string;
+  redeemedUsers: RedeemedUser[];
+}
+
+export interface PayUsersRequest {
+  vendorId: string;
+  totalPayout: number;
+}
+
+export interface PayUsersResponse {
+  message: string;
+  userIds: string[];
+}
+
 async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {},
@@ -168,6 +214,25 @@ export const authApi = {
   async refreshToken(): Promise<ApiResponse> {
     return apiCall("/auth/vendors/refresh", {
       method: "POST",
+    });
+  },
+
+  async getAllVendors(): Promise<ApiResponse<VendorsResponse>> {
+    return apiCall<VendorsResponse>("/user/all-vendors", {
+      method: "GET",
+    });
+  },
+
+  async getAllRedeemedUsers(): Promise<ApiResponse<RedeemedUsersResponse>> {
+    return apiCall<RedeemedUsersResponse>("/user/all-redeemed-users", {
+      method: "GET",
+    });
+  },
+
+  async payUsers(data: PayUsersRequest): Promise<ApiResponse<PayUsersResponse>> {
+    return apiCall<PayUsersResponse>("/user/pay-users", {
+      method: "POST",
+      body: JSON.stringify(data),
     });
   },
 };
