@@ -32,7 +32,7 @@ export default function Header() {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    
+
     try {
       await authApi.logout();
     } catch (error) {
@@ -48,18 +48,13 @@ export default function Header() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="h-10 flex items-center hover:opacity-80 transition-opacity cursor-pointer"
-            >
-              <Image
-                src="/images/wordmark.svg"
-                alt="Pickspot Logo"
-                width={120}
-                height={40}
-                className="h-8 w-auto lg:pl-4"
-              />
-            </Link>
+            <Image
+              src="/images/wordmark.svg"
+              alt="Pickspot Logo"
+              width={120}
+              height={40}
+              className="h-8 w-auto lg:pl-4"
+            />
           </div>
         </div>
 
