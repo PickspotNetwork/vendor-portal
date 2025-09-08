@@ -62,6 +62,7 @@ export interface Vendor {
   role: string;
   createdAt: string;
   updatedAt: string;
+  unpaidRedeemedUsersCount: number;
 }
 
 export interface VendorsResponse {

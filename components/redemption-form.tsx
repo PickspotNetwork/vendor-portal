@@ -2,7 +2,6 @@
 
 import { useState, FormEvent } from "react";
 import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +21,6 @@ interface RedemptionResult {
 }
 
 export default function RedemptionForm() {
-  const router = useRouter();
   const [digitalHandle, setDigitalHandle] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -160,7 +158,7 @@ export default function RedemptionForm() {
             ? err.message
             : "Failed to redeem digital handle";
         setError(errorMessage);
-        router.push("/");
+        return null;
       } finally {
         setIsLoading(false);
       }

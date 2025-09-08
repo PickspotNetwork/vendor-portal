@@ -159,7 +159,7 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
                   Phone Number
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Role
+                  Unpaid
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Created
@@ -192,16 +192,16 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {vendor.phoneNumber}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        vendor.role === "admin"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-green-100 text-green-800"
-                      }`}
-                    >
-                      {vendor.role}
-                    </span>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    {vendor.unpaidRedeemedUsersCount > 0 ? (
+                      <span className="inline-flex items-center justify-center px-2 py-1 text-sm font-medium rounded bg-gray-100 text-gray-900 border">
+                        {vendor.unpaidRedeemedUsersCount}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-400">
+                        —
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatDate(vendor.createdAt)}
