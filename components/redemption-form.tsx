@@ -80,6 +80,7 @@ export default function RedemptionForm() {
     setError("");
     setSuccess("");
     setRedeemResult(null);
+    setShowModal(false);
 
     const accessToken = Cookies.get("accessToken");
 
@@ -88,6 +89,7 @@ export default function RedemptionForm() {
       setIsLoading(false);
       return;
     }
+
     const redeemHandle = async (token: string) => {
       try {
         const response = await fetch(
@@ -137,7 +139,8 @@ export default function RedemptionForm() {
           }
           setShowModal(true);
           setDigitalHandle("");
-          return;
+          setIsLoading(false);
+          return "error";
         }
 
         setRedeemResult({
@@ -150,23 +153,24 @@ export default function RedemptionForm() {
         setShowModal(true);
         setDigitalHandle("");
         refreshRedemptionsList();
+        setIsLoading(false);
 
+        return data;
       } catch (err) {
         const errorMessage =
           err instanceof Error
             ? err.message
             : "Failed to redeem digital handle";
         setError(errorMessage);
-        return null;
-      } finally {
         setIsLoading(false);
+        return null;
       }
     };
 
     try {
       let data = await redeemHandle(accessToken);
 
-      if (!data) {
+      if (data === null) {
         const newAccessToken = await refreshToken();
 
         if (newAccessToken) {
@@ -184,7 +188,6 @@ export default function RedemptionForm() {
           ? error.message
           : "An unexpected error occurred.",
       );
-    } finally {
       setIsLoading(false);
     }
   };
