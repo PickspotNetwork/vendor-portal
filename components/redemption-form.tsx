@@ -151,7 +151,6 @@ export default function RedemptionForm() {
         setDigitalHandle("");
         refreshRedemptionsList();
 
-        return await response.json();
       } catch (err) {
         const errorMessage =
           err instanceof Error
