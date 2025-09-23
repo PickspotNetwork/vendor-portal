@@ -26,6 +26,7 @@ interface RedeemedUser {
 interface ApiResponse {
   message: string;
   redeemedUsers: RedeemedUser[];
+  isNewVendor?: boolean;
 }
 
 const refreshRedemptionsRef = { current: null as (() => void) | null };
@@ -40,11 +41,13 @@ export default function RecentRedemptions() {
   const [redeemedUsers, setRedeemedUsers] = useState<RedeemedUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isNewVendor, setIsNewVendor] = useState(false);
   const router = useRouter();
 
   const fetchRedeemedUsers = useCallback(async () => {
     setIsLoading(true);
     setError("");
+    setIsNewVendor(false);
 
     const accessToken = Cookies.get("accessToken");
 
@@ -69,6 +72,10 @@ export default function RecentRedemptions() {
         if (response.status === 401) return null;
 
         if (!response.ok) {
+          if (response.status === 404) {
+            // New vendor with no redemptions yet
+            return { redeemedUsers: [], isNewVendor: true };
+          }
           setError("Error fetching recent deliveries");
           return null;
         }
@@ -109,6 +116,7 @@ export default function RecentRedemptions() {
           );
         });
         setRedeemedUsers(sortedUsers);
+        if (data.isNewVendor) setIsNewVendor(true);
       } else {
         setError("Failed to fetch redemption data");
         setRedeemedUsers([]);
@@ -176,6 +184,20 @@ export default function RecentRedemptions() {
           <RefreshCw className="h-3 w-3 mr-1" />
           Try again
         </Button>
+      </div>
+    );
+  }
+
+  if (isNewVendor) {
+    return (
+      <div className="text-center py-8">
+        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <User className="h-6 w-6 text-gray-400" />
+        </div>
+        <p className="text-gray-500 font-medium">Welcome to your vendor portal!</p>
+        <p className="text-sm text-gray-400 mt-1">
+          You don&apos;t have any redemptions yet. Start redeeming digital handles to see them here
+        </p>
       </div>
     );
   }
