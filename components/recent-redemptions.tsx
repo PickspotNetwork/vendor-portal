@@ -259,9 +259,6 @@ export default function RecentRedemptions() {
                 <p className="font-mono text-sm font-medium text-gray-900 truncate">
                   {user._id}
                 </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {user.phoneNumber}
-                </p>
               </div>
             </div>
 

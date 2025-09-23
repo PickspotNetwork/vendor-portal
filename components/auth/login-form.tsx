@@ -194,6 +194,9 @@ function SignupFields({
           disabled={isLoading}
           className="focus-visible:ring-[#D62E1F] focus-visible:ring-2"
         />
+        <p className="text-xs text-gray-500">
+          Must be a Safaricom number registered on M-Pesa
+        </p>
       </div>
       <div className="grid gap-2">
         <Label htmlFor="signup-password">Password</Label>
