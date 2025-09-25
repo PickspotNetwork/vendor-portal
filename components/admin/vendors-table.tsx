@@ -148,7 +148,7 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
 
   return (
     <div className="space-y-4 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-2">
+      <div className="hidden lg:flex items-center justify-between mb-2">
         <div className="flex items-center gap-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
@@ -169,12 +169,12 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
 
             <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm">
               <TrendingUp className="h-4 w-4 text-gray-600" />
-                <div className="text-xs text-gray-500 uppercase tracking-wide">
-                  Outstanding
-                </div>
-                <div className="text-sm font-bold text-[#d62e1f]">
-                  KSh {totalUnpaidAmount.toLocaleString()}
-                </div>
+              <div className="text-xs text-gray-500 uppercase tracking-wide">
+                Outstanding
+              </div>
+              <div className="text-sm font-bold text-[#d62e1f]">
+                KSh {totalUnpaidAmount.toLocaleString()}
+              </div>
             </div>
           </div>
         </div>
@@ -194,9 +194,50 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
           </Button>
         </div>
       </div>
+      <div className="lg:hidden space-y-4 mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+              All Vendors
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Manage and monitor vendor accounts
+            </p>
+          </div>
+          <Button
+            onClick={fetchVendors}
+            variant="ghost"
+            size="sm"
+            className="h-10 w-10 p-0 rounded-xl hover:bg-gray-100 transition-all duration-200 group"
+          >
+            <RefreshCw className="h-4 w-4 text-gray-600 group-hover:rotate-180 transition-transform duration-300" />
+          </Button>
+        </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 h-[80vh]">
-      <div className="overflow-y-auto h-full">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex items-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm">
+            <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium text-gray-700">
+              {vendors.length} {vendors.length === 1 ? "vendor" : "vendors"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm">
+            <TrendingUp className="h-4 w-4 text-gray-600 flex-shrink-0" />
+            <div>
+              <div className="text-xs text-gray-500 uppercase tracking-wide">
+                Outstanding
+              </div>
+              <div className="text-sm font-bold text-[#d62e1f]">
+                KSh {totalUnpaidAmount.toLocaleString()}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 h-[70vh] lg:h-[80vh]">
+        <div className="overflow-y-auto h-full">
           <table className="w-full">
             <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 sticky top-0 z-10">
               <tr>
