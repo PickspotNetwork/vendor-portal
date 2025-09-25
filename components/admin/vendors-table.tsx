@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Vendor } from "@/lib/api";
-import { Loader2, User, Eye, RefreshCw } from "lucide-react";
+import { Loader2, User, Eye, RefreshCw, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Cookies from "js-cookie";
 import { refreshToken } from "@/utils/authService";
@@ -38,7 +38,7 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          },
+          }
         );
         if (response.status === 401) return null;
 
@@ -81,12 +81,20 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
       }
     } catch (error) {
       setError(
-        error instanceof Error ? error.message : "An unexpected error occurred.",
+        error instanceof Error ? error.message : "An unexpected error occurred."
       );
     } finally {
       setIsLoading(false);
     }
   };
+
+  const totalUnpaidAmount = vendors.reduce(
+    (sum, vendor) => sum + vendor.unpaidRedeemedUsersCount * 50,
+    0
+  );
+  const sortedVendors = [...vendors].sort(
+    (a, b) => b.unpaidRedeemedUsersCount - a.unpaidRedeemedUsersCount
+  );
 
   useEffect(() => {
     fetchVendors();
@@ -140,40 +148,83 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
 
   return (
     <div className="space-y-4 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">All Vendors</h2>
-        <Button onClick={fetchVendors} variant="ghost" size="sm" className="h-8 w-8 p-0">
-          <RefreshCw className="h-3 w-3" />
-        </Button>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+              All Vendors
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Manage and monitor vendor accounts
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm">
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-gray-700">
+                {vendors.length} {vendors.length === 1 ? "vendor" : "vendors"}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm">
+              <TrendingUp className="h-4 w-4 text-gray-600" />
+                <div className="text-xs text-gray-500 uppercase tracking-wide">
+                  Outstanding
+                </div>
+                <div className="text-sm font-bold text-[#d62e1f]">
+                  KSh {totalUnpaidAmount.toLocaleString()}
+                </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <div className="text-xs text-gray-500">Last updated</div>
+            <div className="text-sm font-medium text-gray-700">Just now</div>
+          </div>
+          <Button
+            onClick={fetchVendors}
+            variant="ghost"
+            size="sm"
+            className="h-10 w-10 p-0 rounded-xl hover:bg-gray-100 transition-all duration-200 group"
+          >
+            <RefreshCw className="h-4 w-4 text-gray-600 group-hover:rotate-180 transition-transform duration-300" />
+          </Button>
+        </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 h-[80vh]">
+      <div className="overflow-y-auto h-full">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 sticky top-0 z-10">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Vendor
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  <div className="flex items-center">
+                    <User className="h-4 w-4 mr-2 text-gray-400" />
+                    Vendor
+                  </div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Phone Number
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                   Unpaid
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created
+                <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  Contact
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  Joined
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {vendors.map((vendor) => (
+              {sortedVendors.map((vendor) => (
                 <tr
                   key={vendor._id}
-                  className="hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 cursor-pointer transition-all duration-300 border-b border-gray-100 hover:border-blue-200 hover:shadow-sm"
                   onClick={() => onVendorSelect(vendor)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -185,38 +236,52 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
                         <p className="text-sm font-medium text-gray-900 capitalize">
                           {vendor.firstName} {vendor.lastName}
                         </p>
-                        <p className="text-xs text-gray-500 font-mono">{vendor._id}</p>
+                        <p className="text-xs text-gray-500 font-mono">
+                          {vendor._id}
+                        </p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {vendor.phoneNumber}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     {vendor.unpaidRedeemedUsersCount > 0 ? (
-                      <span className="inline-flex items-center justify-center px-2 py-1 text-sm font-medium rounded bg-gray-100 text-gray-900 border">
+                      <span className="inline-flex items-center justify-center px-3 font-medium rounded-[5px] bg-[#fff9f9] text-[#d62e1f] border-[1px] border-[#d62e1f]">
                         {vendor.unpaidRedeemedUsersCount}
                       </span>
                     ) : (
-                      <span className="text-sm text-gray-400">
-                        —
-                      </span>
+                      <span className="text-sm text-gray-400">—</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(vendor.createdAt)}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center justify-center">
+                      <span className="text-sm font-sans text-gray-700 bg-gray-50 px-3 py-1 rounded-lg">
+                        {vendor.phoneNumber}
+                      </span>
+                    </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-600">
+                      {formatDate(vendor.createdAt)}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {Math.floor(
+                        (new Date().getTime() -
+                          new Date(vendor.createdAt).getTime()) /
+                          (1000 * 60 * 60 * 24)
+                      )}{" "}
+                      days ago
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0"
+                      className="h-9 w-9 p-0 rounded-full hover:text-[#d62e1f] hover:bg-white transition-all duration-200 group"
                       onClick={(e) => {
                         e.stopPropagation();
                         onVendorSelect(vendor);
                       }}
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
                     </Button>
                   </td>
                 </tr>

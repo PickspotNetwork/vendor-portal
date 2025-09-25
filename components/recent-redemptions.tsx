@@ -67,7 +67,7 @@ export default function RecentRedemptions() {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          },
+          }
         );
         if (response.status === 401) return null;
 
@@ -194,9 +194,12 @@ export default function RecentRedemptions() {
         <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <User className="h-6 w-6 text-gray-400" />
         </div>
-        <p className="text-gray-500 font-medium">Welcome to your vendor portal!</p>
+        <p className="text-gray-500 font-medium">
+          Welcome to your vendor portal!
+        </p>
         <p className="text-sm text-gray-400 mt-1">
-          You don&apos;t have any redemptions yet. Start redeeming digital handles to see them here
+          You don&apos;t have any redemptions yet. Start redeeming digital
+          handles to see them here
         </p>
       </div>
     );
@@ -233,34 +236,59 @@ export default function RecentRedemptions() {
           </Button>
         </div>
 
-        <div className="bg-black text-white rounded-xl p-4 border border-[#D62E1F]/20">
-          <div className="flex items-center justify-between mb-1">
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-xs uppercase tracking-wide font-medium">
-                Amount Earned
+              <h3 className="text-lg font-semibold">Redemption Summary</h3>
+              <p className="text-sm text-gray-300">Your earnings overview</p>
+            </div>
+            <div className="w-12 h-12 bg-[#D62E1F]/10 rounded-full flex items-center justify-center">
+              <DollarSign className="h-6 w-6 text-white" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 pt-3 border-t border-gray-700">
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wide">
+                Total
               </p>
-              <p className="text-2xl font-bold text-green-600 mt-1">
+              <p className="text-base font-semibold text-white">
                 KSh {(redeemedUsers.length * 50).toLocaleString()}
               </p>
             </div>
-            <div className="text-right">
-              <div className="w-12 h-12 bg-[#D62E1F]/10 rounded-full flex items-center justify-center">
-                <DollarSign className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-gray-700">
             <div>
-              <p className="text-xs text-gray-400 uppercase tracking-wide">Paid</p>
-              <p className="text-sm font-semibold text-white">
-                KSh {(redeemedUsers.filter(user => user.isPaid).length * 50).toLocaleString()}
+              <p className="text-xs text-gray-400 uppercase tracking-wide">
+                Paid
+              </p>
+              <p className="text-base font-semibold text-green-500">
+                KSh{" "}
+                {(
+                  redeemedUsers.filter((user) => user.isPaid).length * 50
+                ).toLocaleString()}
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-400 uppercase tracking-wide">Unpaid</p>
-              <p className="text-sm font-semibold text-[#d62e1f]">
-                KSh {(redeemedUsers.filter(user => !user.isPaid).length * 50).toLocaleString()}
+              <p className="text-xs text-gray-400 uppercase tracking-wide">
+                Unpaid
+              </p>
+              <p className="text-base font-semibold text-[#d62e1f]">
+                KSh{" "}
+                {(
+                  redeemedUsers.filter((user) => !user.isPaid).length * 50
+                ).toLocaleString()}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-2 pt-3 border-t border-gray-700">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 bg-[#D62E1F]/50 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xs">!</span>
+              </div>
+              <p className="text-xs text-gray-300">
+                <span className="font-medium text-white">
+                  Payment requires minimum 2 redemptions
+                </span>
               </p>
             </div>
           </div>

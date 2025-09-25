@@ -208,7 +208,7 @@ export default function RedemptionForm() {
               type="text"
               value={digitalHandle}
               onChange={handleInputChange}
-              placeholder="e.g., ominoobwos@pickspot.world"
+              placeholder="e.g., dennis@pickspot.world"
               disabled={isLoading}
               className="pl-10 focus:ring-[#D62E1F] focus:border-[#D62E1F]"
             />
