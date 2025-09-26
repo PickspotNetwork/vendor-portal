@@ -112,6 +112,10 @@ export function useAuth() {
       try {
         if (accessToken) {
           const decodedToken = jwtDecode<CustomJwtPayload>(accessToken);
+          if (decodedToken.suspended) {
+            router.push("/suspended");
+            return;
+          }
           if (decodedToken.role === "admin") {
             router.push("/admin");
           } else {

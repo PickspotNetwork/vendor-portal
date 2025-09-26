@@ -11,9 +11,14 @@ import { useState, FormEvent, Dispatch, SetStateAction } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { validateFormInput, validatePhoneNumber, validateName, } from "@/lib/input-sanitization";
+import {
+  validateFormInput,
+  validatePhoneNumber,
+  validateName,
+} from "@/lib/input-sanitization";
 import { validatePassword } from "@/lib/password-validation";
 // import { PasswordStrength } from "@/components/auth/password-strength";
+import TermsModal from "./terms-modal";
 
 type LoginFormState = {
   phoneNumber: string;
@@ -262,6 +267,7 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const { isLoading, error, login, signup, clearMessages } = useAuth();
 
   const [loginForm, setLoginForm] = useState({
@@ -291,7 +297,7 @@ export function LoginForm({
 
     const passwordValidation = validateFormInput(
       loginForm.password,
-      "Password",
+      "Password"
     );
     if (!passwordValidation.isValid) {
       return;
@@ -340,7 +346,7 @@ export function LoginForm({
 
     const passwordSecurityValidation = validateFormInput(
       signupForm.password,
-      "Password",
+      "Password"
     );
     if (!passwordSecurityValidation.isValid) {
       return;
@@ -382,7 +388,7 @@ export function LoginForm({
                   "flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all",
                   activeTab === "login"
                     ? "bg-black text-white shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
+                    : "text-muted-foreground hover:text-foreground"
                 )}
                 onClick={() => setActiveTab("login")}
               >
@@ -394,7 +400,7 @@ export function LoginForm({
                   "flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all",
                   activeTab === "signup"
                     ? "bg-black text-white shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
+                    : "text-muted-foreground hover:text-foreground"
                 )}
                 onClick={() => setActiveTab("signup")}
               >
@@ -420,7 +426,7 @@ export function LoginForm({
                 />
               ) : (
                 <>
-                {/* <SignupFields
+                  {/* <SignupFields
   signupForm={signupForm}
   setSignupForm={setSignupForm}
   isLoading={isLoading}
@@ -430,32 +436,41 @@ export function LoginForm({
   }}
 /> */}
 
-<div className="text-center py-8 px-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200">
-  <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-    <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-    </svg>
-  </div>
-  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-    Vendor Registration Temporarily Closed
-  </h3>
-  <p className="text-sm text-gray-600 mb-4">
-    We&apos;ve reached our current capacity for new vendors. Our existing vendor network is thriving and we want to ensure the best experience for everyone.
-  </p>
-  <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600">
-    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-    <span>Existing vendors can continue to login above</span>
-  </div>
-  <button
-    onClick={() => {
-      setActiveTab("login");
-      clearMessages();
-    }}
-    className="mt-4 text-sm text-[#D62E1F] hover:text-[#B22E1F] font-medium transition-colors"
-  >
-    ← Back to Login
-  </button>
-</div>
+                  <div className="text-center py-8 px-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg
+                        className="w-8 h-8 text-red-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Vendor Registration Temporarily Closed
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      We&apos;ve reached our current capacity for new vendors. <br />
+                      Our existing vendor network is thriving and we want to
+                      ensure the best experience for everyone.
+                    </p>
+                    
+                    <button
+                      onClick={() => {
+                        setActiveTab("login");
+                        clearMessages();
+                      }}
+                      className="mt-4 text-sm text-[#D62E1F] hover:text-[#B22E1F] font-medium transition-colors"
+                    >
+                      ← Back to Login
+                    </button>
+                  </div>
                 </>
               )}
             </form>
@@ -475,13 +490,33 @@ export function LoginForm({
       </Card>
 
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        By clicking continue, you agree to our{" "}
+        <button
+          type="button"
+          onClick={() => setShowTermsModal(true)}
+          className="underline underline-offset-4 hover:text-primary transition-colors"
+        >
+          Terms of Service
+        </button>{" "}
+        and{" "}
+        <a
+          href="https://www.pickspot.net/privacy-policy"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline underline-offset-4 hover:text-primary transition-colors"
+        >
+          Privacy Policy
+        </a>
+        .
       </div>
 
       {error && (
         <Notification type="error" message={error} onClose={clearMessages} />
       )}
+      <TermsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
     </div>
   );
 }

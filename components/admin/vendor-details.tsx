@@ -2,7 +2,16 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { RedeemedUser, Vendor } from "@/lib/api";
-import { Loader2, User, ArrowLeft, RefreshCw, DollarSign } from "lucide-react";
+import {
+  Loader2,
+  User,
+  ArrowLeft,
+  RefreshCw,
+  DollarSign,
+  Ban,
+  X,
+  AlertTriangle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Cookies from "js-cookie";
 import { refreshToken } from "@/utils/authService";
@@ -18,6 +27,10 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [hasNoRedemptions, setHasNoRedemptions] = useState(false);
+  const [isSuspending, setIsSuspending] = useState(false);
+  const [showSuspendSuccess, setShowSuspendSuccess] = useState(false);
+  const [suspendMessage, setSuspendMessage] = useState("");
+  const [showSuspendModal, setShowSuspendModal] = useState(false);
 
   const fetchRedeemedUsers = useCallback(async () => {
     setIsLoading(true);
@@ -83,7 +96,7 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
         if (newAccessToken) {
           Cookies.set("accessToken", newAccessToken);
           data = await fetchRedeemed(newAccessToken);
-          
+
           if (data === "404_handled") {
             return;
           }
@@ -117,6 +130,102 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
   useEffect(() => {
     fetchRedeemedUsers();
   }, [fetchRedeemedUsers]);
+
+  const handleSuspendVendor = () => {
+    setShowSuspendModal(true);
+  };
+
+  const handleSuspendConfirm = async () => {
+    setIsSuspending(true);
+    setShowSuspendModal(false);
+    setError("");
+  
+    const accessToken = Cookies.get("accessToken");
+  
+    if (!accessToken) {
+      setError("Access token not found");
+      setIsSuspending(false);
+      return;
+    }
+  
+    const suspendVendor = async (token: string) => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/user/suspend?vendorId=${vendor._id}`,
+          {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (response.status === 401) return null;
+  
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError("Vendor not found");
+            setIsSuspending(false);
+            return "404_handled";
+          } else {
+            setError("Error suspending vendor");
+            setIsSuspending(false);
+            return null;
+          }
+        }
+  
+        const data = await response.json();
+        return data;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to suspend vendor";
+        setError(errorMessage);
+        setIsSuspending(false);
+        return null;
+      }
+    };
+  
+    try {
+      let data = await suspendVendor(accessToken);
+  
+      if (data === "404_handled") {
+        return;
+      }
+  
+      if (!data) {
+        const newAccessToken = await refreshToken();
+  
+        if (newAccessToken) {
+          Cookies.set("accessToken", newAccessToken);
+          data = await suspendVendor(newAccessToken);
+  
+          if (data === "404_handled") {
+            return;
+          }
+        } else {
+          setError("Session expired");
+          setIsSuspending(false);
+          return;
+        }
+      }
+  
+      if (data) {
+        setSuspendMessage(
+          data.msg || data.message || "Vendor has been suspended successfully"
+        );
+        setShowSuspendSuccess(true);
+        setTimeout(() => setShowSuspendSuccess(false), 5000);
+      } else {
+        setError("Failed to suspend vendor");
+      }
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "An unexpected error occurred."
+      );
+    } finally {
+      setIsSuspending(false);
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -204,15 +313,23 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
             <p className="text-xs text-gray-500 font-mono mt-1">{vendor._id}</p>
           </div>
           <div className="text-right">
-            <span
-              className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
-                vendor.role === "admin"
-                  ? "bg-red-100 text-red-800"
-                  : "bg-green-100 text-green-800"
-              }`}
+            <Button
+              onClick={handleSuspendVendor}
+              disabled={isSuspending}
+              className="bg-[#d62e1f] hover:bg-[#b22e1f] text-white px-6 py-2 text-sm font-semibold rounded-lg transition-colors duration-200 flex items-center gap-2"
             >
-              {vendor.role}
-            </span>
+              {isSuspending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Suspending...
+                </>
+              ) : (
+                <>
+                  <Ban className="h-4 w-4" />
+                  Suspend Vendor
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </div>
@@ -279,7 +396,6 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
         <PaymentForm vendor={vendor} onPaymentSuccess={fetchRedeemedUsers} />
       )}
 
-      {/* Redeemed Users Table */}
       {!hasNoRedemptions && redeemedUsers.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
           <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -347,6 +463,107 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
           </div>
         </div>
       ) : null}
+
+      {showSuspendModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all border border-gray-100">
+            <div className="relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-white opacity-60"></div>
+
+              <div className="relative p-8">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSuspendModal(false)}
+                  className="absolute top-4 right-4 h-8 w-8 p-0 hover:bg-gray-100 rounded-full"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4 shadow-inner">
+                    <AlertTriangle className="h-8 w-8 text-red-600" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-bold text-gray-900">
+                      Suspend Vendor Account
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      Are you sure you want to suspend{" "}
+                      <span className="font-semibold text-gray-900">
+                        {vendor.firstName} {vendor.lastName}
+                      </span>
+                      ? This action will immediately revoke their access to the
+                      platform.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-red-50 rounded-xl p-4 mb-6 border border-red-200">
+                  <div className="text-center">
+                    <p className="text-xs text-red-500 uppercase tracking-wide font-medium mb-1">
+                      Vendor ID
+                    </p>
+                    <p className="text-sm font-mono text-red-900 break-all font-medium">
+                      {vendor._id}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => setShowSuspendModal(false)}
+                    variant="outline"
+                    className="flex-1 border-gray-300 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSuspendConfirm}
+                    disabled={isSuspending}
+                    className="flex-1 bg-[#d62e1f] hover:bg-[#b22e1f] text-white"
+                  >
+                    {isSuspending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Suspending...
+                      </>
+                    ) : (
+                      <>
+                        <Ban className="h-4 w-4 mr-2" />
+                        Suspend
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSuspendSuccess && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-8 max-w-md mx-4 shadow-2xl">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Ban className="h-8 w-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Vendor Suspended Successfully
+              </h3>
+              <p className="text-gray-600 mb-6">{suspendMessage}</p>
+              <Button
+                onClick={() => setShowSuspendSuccess(false)}
+                className="bg-[#d62e1f] hover:bg-[#b22e1f] text-white px-6 py-2 rounded-lg"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

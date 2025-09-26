@@ -63,6 +63,7 @@ export interface Vendor {
   createdAt: string;
   updatedAt: string;
   unpaidRedeemedUsersCount: number;
+  suspended?: boolean;
 }
 
 export interface VendorsResponse {
@@ -99,6 +100,10 @@ export interface PayUsersRequest {
 export interface PayUsersResponse {
   message: string;
   userIds: string[];
+}
+
+export interface SuspendVendorResponse {
+  msg: string;
 }
 
 async function apiCall<T>(
@@ -234,6 +239,12 @@ export const authApi = {
     return apiCall<PayUsersResponse>("/user/pay-users", {
       method: "POST",
       body: JSON.stringify(data),
+    });
+  },
+
+  async suspendVendor(vendorId: string): Promise<ApiResponse<SuspendVendorResponse>> {
+    return apiCall<SuspendVendorResponse>(`/user/suspend?vendorId=${vendorId}`, {
+      method: "PATCH",
     });
   },
 };

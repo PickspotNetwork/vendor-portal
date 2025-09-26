@@ -10,6 +10,7 @@ interface CustomJwtPayload extends JwtPayload {
   lastName: string;
   phoneNumber: string;
   role: string;
+  suspended: boolean;
   iat: number;
   exp: number;
 }
@@ -36,43 +37,48 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const accessToken = Cookies.get("accessToken");
+useEffect(() => {
+  const accessToken = Cookies.get("accessToken");
 
-    if (!accessToken) {
-      console.warn("No access token found. Redirecting to login.");
-      router.push("/");
-      return;
-    }
+  if (!accessToken) {
+    console.warn("No access token found. Redirecting to login.");
+    router.push("/");
+    return;
+  }
 
-    if (accessToken) {
-      try {
-        const decodedToken = jwtDecode<CustomJwtPayload>(accessToken);
+  if (accessToken) {
+    try {
+      const decodedToken = jwtDecode<CustomJwtPayload>(accessToken);
 
-        const userData = {
-          vendorId: decodedToken.vendorId,
-          firstName: decodedToken.firstName,
-          lastName: decodedToken.lastName,
-          phoneNumber: decodedToken.phoneNumber,
-          role: decodedToken.role,
-        };
+      const userData = {
+        vendorId: decodedToken.vendorId,
+        firstName: decodedToken.firstName,
+        lastName: decodedToken.lastName,
+        phoneNumber: decodedToken.phoneNumber,
+        role: decodedToken.role,
+      };
 
-        setUser(userData);
+      setUser(userData);
 
-        const currentPath = window.location.pathname;
-        if (decodedToken.role === "admin" && currentPath === "/dashboard") {
-          router.push("/admin");
-        } else if (decodedToken.role === "vendor" && currentPath === "/admin") {
-          router.push("/dashboard");
-        }
-      } catch (error) {
-        console.log("Error decoding token:", error);
-        Cookies.remove("accessToken");
-        router.push("/");
-        setUser(null);
+      const currentPath = window.location.pathname;
+      if (decodedToken.suspended && currentPath === "/dashboard") {
+        router.push("/suspended");
+        return;
       }
+
+      if (decodedToken.role === "admin" && currentPath === "/dashboard") {
+        router.push("/admin");
+      } else if (decodedToken.role === "vendor" && currentPath === "/admin") {
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.log("Error decoding token:", error);
+      Cookies.remove("accessToken");
+      router.push("/");
+      setUser(null);
     }
-  }, [router]);
+  }
+}, [router]);
 
   const logout = () => {
     Cookies.remove("accessToken");

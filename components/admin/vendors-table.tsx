@@ -239,16 +239,16 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 h-[70vh] lg:h-[80vh]">
         <div className="overflow-y-auto h-full">
           <table className="w-full">
-            <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 sticky top-0 z-10">
+            <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                  <div className="flex items-center">
-                    <User className="h-4 w-4 mr-2 text-gray-400" />
-                    Vendor
-                  </div>
+                  Vendor
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                   Unpaid
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  Status
                 </th>
                 <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">
                   Contact
@@ -265,16 +265,21 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
               {sortedVendors.map((vendor) => (
                 <tr
                   key={vendor._id}
-                  className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 cursor-pointer transition-all duration-300 border-b border-gray-100 hover:border-blue-200 hover:shadow-sm"
+                  className={`hover:bg-gradient-to-r cursor-pointer transition-all duration-300 border-b border-gray-100 hover:shadow-sm ${
+                    vendor.suspended
+                      ? "hover:from-red-50 hover:to-pink-50 hover:border-red-200 bg-red-50/90"
+                      : "hover:from-blue-50 hover:to-indigo-50 hover:border-blue-200"
+                  }`}
                   onClick={() => onVendorSelect(vendor)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <User className="h-4 w-4 text-gray-600" />
-                      </div>
-                      <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900 capitalize">
+                      <div className="">
+                        <p
+                          className={`text-sm font-medium capitalize ${
+                            vendor.suspended ? "text-red-900" : "text-gray-900"
+                          }`}
+                        >
                           {vendor.firstName} {vendor.lastName}
                         </p>
                         <p className="text-xs text-gray-500 font-mono">
@@ -290,6 +295,19 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
                       </span>
                     ) : (
                       <span className="text-sm text-gray-400">—</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {vendor.suspended ? (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-200">
+                        <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                        Suspended
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                        Active
+                      </span>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

@@ -6,6 +6,7 @@ export interface CustomJwtPayload extends JwtPayload {
   lastName: string;
   phoneNumber: string;
   role: string;
+  suspended?: boolean;
   iat: number;
   exp: number;
 }
