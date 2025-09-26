@@ -69,7 +69,8 @@ export function SuspensionScreen() {
                 <p className="mb-4">
                   Our system has detected violations of the campaign rules, specifically the use of{" "}
                   <span className="font-semibold text-red-300">non-existent phone numbers</span>,{" "}
-                  <span className="font-semibold text-red-300">duplicate registrations</span>, or other forms of abuse in creating digital addresses.
+                  <span className="font-semibold text-red-300">duplicate registrations</span>,{" "}
+                  <span className="font-semibold text-red-300">inactivity</span>, or other forms of abuse in creating digital addresses.
                 </p>
                 <p className="mb-4">
                   Participation in this campaign is strictly limited to genuine, verified users. Any attempt to exploit the system undermines the fairness of the process and will result in immediate suspension.
@@ -111,7 +112,7 @@ export function SuspensionScreen() {
             transition={{ delay: 1.5, duration: 0.6 }}
             className="text-center mt-8 text-gray-400 text-sm"
           >
-            <p>Piece of shit.</p>
+            <p>© 2025 Pickspot. All rights reserved.</p>
           </motion.div>
         </div>
 

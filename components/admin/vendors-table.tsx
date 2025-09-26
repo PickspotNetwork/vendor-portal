@@ -88,13 +88,21 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
     }
   };
 
-  const totalUnpaidAmount = vendors.reduce(
-    (sum, vendor) => sum + vendor.unpaidRedeemedUsersCount * 50,
-    0
-  );
-  const sortedVendors = [...vendors].sort(
-    (a, b) => b.unpaidRedeemedUsersCount - a.unpaidRedeemedUsersCount
-  );
+  const totalUnpaidAmount = vendors
+    .filter((vendor) => !vendor.suspended)
+    .reduce((sum, vendor) => sum + vendor.unpaidRedeemedUsersCount * 50, 0);
+
+  const activeVendors = vendors.filter((vendor) => !vendor.suspended);
+  const suspendedVendors = vendors.filter((vendor) => vendor.suspended);
+
+  const sortedVendors = [
+    ...activeVendors.sort(
+      (a, b) => b.unpaidRedeemedUsersCount - a.unpaidRedeemedUsersCount
+    ),
+    ...suspendedVendors.sort(
+      (a, b) => b.unpaidRedeemedUsersCount - a.unpaidRedeemedUsersCount
+    ),
+  ];
 
   useEffect(() => {
     fetchVendors();
@@ -163,7 +171,9 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
             <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm">
               <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
               <span className="text-sm font-medium text-gray-700">
-                {vendors.length} {vendors.length === 1 ? "vendor" : "vendors"}
+                {activeVendors.length} active{" "}
+                {activeVendors.length === 1 ? "vendor" : "vendors"} (
+                {suspendedVendors.length} suspended)
               </span>
             </div>
 
@@ -218,7 +228,8 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
           <div className="flex items-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm">
             <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
             <span className="text-sm font-medium text-gray-700">
-              {vendors.length} {vendors.length === 1 ? "vendor" : "vendors"}
+              {activeVendors.length} active ({suspendedVendors.length}{" "}
+              suspended)
             </span>
           </div>
 
