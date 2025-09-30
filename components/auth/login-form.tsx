@@ -297,7 +297,7 @@ export function LoginForm({
 
     const passwordValidation = validateFormInput(
       loginForm.password,
-      "Password"
+      "Password",
     );
     if (!passwordValidation.isValid) {
       return;
@@ -346,7 +346,7 @@ export function LoginForm({
 
     const passwordSecurityValidation = validateFormInput(
       signupForm.password,
-      "Password"
+      "Password",
     );
     if (!passwordSecurityValidation.isValid) {
       return;
@@ -388,7 +388,7 @@ export function LoginForm({
                   "flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all",
                   activeTab === "login"
                     ? "bg-black text-white shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
                 onClick={() => setActiveTab("login")}
               >
@@ -400,7 +400,7 @@ export function LoginForm({
                   "flex-1 py-2 px-4 text-sm font-medium rounded-md transition-all",
                   activeTab === "signup"
                     ? "bg-black text-white shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
                 onClick={() => setActiveTab("signup")}
               >
@@ -456,11 +456,12 @@ export function LoginForm({
                       Vendor Registration Temporarily Closed
                     </h3>
                     <p className="text-sm text-gray-600 mb-4">
-                      We&apos;ve reached our current capacity for new vendors. <br />
+                      We&apos;ve reached our current capacity for new vendors.{" "}
+                      <br />
                       Our existing vendor network is thriving and we want to
                       ensure the best experience for everyone.
                     </p>
-                    
+
                     <button
                       onClick={() => {
                         setActiveTab("login");

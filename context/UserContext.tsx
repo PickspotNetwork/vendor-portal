@@ -37,48 +37,57 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
-useEffect(() => {
-  const accessToken = Cookies.get("accessToken");
+  useEffect(() => {
+    const accessToken = Cookies.get("accessToken");
 
-  if (!accessToken) {
-    console.warn("No access token found. Redirecting to login.");
-    router.push("/");
-    return;
-  }
-
-  if (accessToken) {
-    try {
-      const decodedToken = jwtDecode<CustomJwtPayload>(accessToken);
-
-      const userData = {
-        vendorId: decodedToken.vendorId,
-        firstName: decodedToken.firstName,
-        lastName: decodedToken.lastName,
-        phoneNumber: decodedToken.phoneNumber,
-        role: decodedToken.role,
-      };
-
-      setUser(userData);
-
-      const currentPath = window.location.pathname;
-      if (decodedToken.suspended && currentPath === "/dashboard") {
-        router.push("/suspended");
-        return;
-      }
-
-      if (decodedToken.role === "admin" && currentPath === "/dashboard") {
-        router.push("/admin");
-      } else if (decodedToken.role === "vendor" && currentPath === "/admin") {
-        router.push("/dashboard");
-      }
-    } catch (error) {
-      console.log("Error decoding token:", error);
-      Cookies.remove("accessToken");
+    if (!accessToken) {
+      console.warn("No access token found. Redirecting to login.");
       router.push("/");
-      setUser(null);
+      return;
     }
-  }
-}, [router]);
+
+    if (accessToken) {
+      try {
+        const decodedToken = jwtDecode<CustomJwtPayload>(accessToken);
+
+        const userData = {
+          vendorId: decodedToken.vendorId,
+          firstName: decodedToken.firstName,
+          lastName: decodedToken.lastName,
+          phoneNumber: decodedToken.phoneNumber,
+          role: decodedToken.role,
+        };
+
+        setUser(userData);
+
+        const currentPath = window.location.pathname;
+        if (decodedToken.suspended && currentPath === "/dashboard") {
+          router.push("/suspended");
+          return;
+        }
+
+        // Role-based routing
+        if (decodedToken.role === "admin" && currentPath === "/dashboard") {
+          router.push("/admin");
+        } else if (
+          decodedToken.role === "agent" &&
+          currentPath === "/dashboard"
+        ) {
+          router.push("/agents");
+        } else if (
+          decodedToken.role === "vendor" &&
+          (currentPath === "/admin" || currentPath === "/agents")
+        ) {
+          router.push("/dashboard");
+        }
+      } catch (error) {
+        console.log("Error decoding token:", error);
+        Cookies.remove("accessToken");
+        router.push("/");
+        setUser(null);
+      }
+    }
+  }, [router]);
 
   const logout = () => {
     Cookies.remove("accessToken");

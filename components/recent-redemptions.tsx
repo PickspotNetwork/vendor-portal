@@ -67,7 +67,7 @@ export default function RecentRedemptions() {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
         if (response.status === 401) return null;
 
@@ -236,7 +236,7 @@ export default function RecentRedemptions() {
           </Button>
         </div>
 
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 text-white shadow-lg">
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-3 lg:p-6 text-white shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-lg font-semibold">Redemption Summary</h3>
@@ -287,7 +287,7 @@ export default function RecentRedemptions() {
               </div>
               <p className="text-xs text-gray-300">
                 <span className="font-medium text-white">
-                  Payment requires minimum 2 redemptions
+                  Payment requires minimum 5 redemptions
                 </span>
               </p>
             </div>
@@ -301,8 +301,8 @@ export default function RecentRedemptions() {
             key={user._id}
             className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
           >
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="flex items-center gap-1 lg:gap-3 flex-1 min-w-0">
+              <div className="w-4 h-4 lg:w-8 lg:h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
                 <User className="h-4 w-4 text-gray-600" />
               </div>
               <div className="flex-1 min-w-0">

@@ -60,7 +60,7 @@ export function ForgotPasswordForm({
       const response = await authApi.forgotPassword({
         phoneNumber: phoneValidation.sanitizedPhone,
       });
-      
+
       if (response.ok) {
         setSuccess(response.message || "Reset code sent to your phone");
         setPhoneNumber(phoneValidation.sanitizedPhone);
@@ -92,7 +92,7 @@ export function ForgotPasswordForm({
     setIsLoading(true);
     try {
       const response = await authApi.verifyResetCode({ resetCode });
-      
+
       if (response.ok) {
         setSuccess(response.message || "Code verified successfully");
         setTimeout(() => {

@@ -14,6 +14,14 @@ export interface SignupRequest {
   password: string;
 }
 
+export interface CreateVendorRequest {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  password: string;
+  agent: string;
+}
+
 export interface SignupResponse {
   firstName: string;
   lastName: string;
@@ -64,6 +72,14 @@ export interface Vendor {
   updatedAt: string;
   unpaidRedeemedUsersCount: number;
   suspended?: boolean;
+  agent?:
+    | {
+        _id: string;
+        firstName: string;
+        lastName: string;
+        phoneNumber: string;
+      }
+    | string;
 }
 
 export interface VendorsResponse {
@@ -177,6 +193,15 @@ export const authApi = {
     });
   },
 
+  async createVendor(
+    vendorData: CreateVendorRequest,
+  ): Promise<ApiResponse<SignupResponse>> {
+    return apiCall<SignupResponse>("/auth/vendors/create-vendor", {
+      method: "POST",
+      body: JSON.stringify(vendorData),
+    });
+  },
+
   async login(credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> {
     return apiCall<LoginResponse>("/auth/vendors/login", {
       method: "POST",
@@ -229,22 +254,35 @@ export const authApi = {
     });
   },
 
+  async getAgentVendors(): Promise<ApiResponse<VendorsResponse>> {
+    return apiCall<VendorsResponse>("/user/all-vendors-per-agent", {
+      method: "GET",
+    });
+  },
+
   async getAllRedeemedUsers(): Promise<ApiResponse<RedeemedUsersResponse>> {
     return apiCall<RedeemedUsersResponse>("/user/all-redeemed-users", {
       method: "GET",
     });
   },
 
-  async payUsers(data: PayUsersRequest): Promise<ApiResponse<PayUsersResponse>> {
+  async payUsers(
+    data: PayUsersRequest,
+  ): Promise<ApiResponse<PayUsersResponse>> {
     return apiCall<PayUsersResponse>("/user/pay-users", {
       method: "POST",
       body: JSON.stringify(data),
     });
   },
 
-  async suspendVendor(vendorId: string): Promise<ApiResponse<SuspendVendorResponse>> {
-    return apiCall<SuspendVendorResponse>(`/user/suspend?vendorId=${vendorId}`, {
-      method: "PATCH",
-    });
+  async suspendVendor(
+    vendorId: string,
+  ): Promise<ApiResponse<SuspendVendorResponse>> {
+    return apiCall<SuspendVendorResponse>(
+      `/user/suspend?vendorId=${vendorId}`,
+      {
+        method: "PATCH",
+      },
+    );
   },
 };

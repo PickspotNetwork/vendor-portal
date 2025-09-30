@@ -20,9 +20,14 @@ import PaymentForm from "./payment-form";
 interface VendorDetailsProps {
   vendor: Vendor;
   onBack: () => void;
+  userRole?: string;
 }
 
-export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
+export default function VendorDetails({
+  vendor,
+  onBack,
+  userRole,
+}: VendorDetailsProps) {
   const [redeemedUsers, setRedeemedUsers] = useState<RedeemedUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -31,6 +36,8 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
   const [showSuspendSuccess, setShowSuspendSuccess] = useState(false);
   const [suspendMessage, setSuspendMessage] = useState("");
   const [showSuspendModal, setShowSuspendModal] = useState(false);
+
+  const isAdmin = userRole === "admin";
 
   const fetchRedeemedUsers = useCallback(async () => {
     setIsLoading(true);
@@ -55,7 +62,7 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
         if (response.status === 401) return null;
 
@@ -110,7 +117,7 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
       if (data && data.redeemedUsers) {
         const sortedUsers = data.redeemedUsers.sort(
           (a: RedeemedUser, b: RedeemedUser) =>
-            new Date(b.redeemedAt).getTime() - new Date(a.redeemedAt).getTime()
+            new Date(b.redeemedAt).getTime() - new Date(a.redeemedAt).getTime(),
         );
         setRedeemedUsers(sortedUsers);
         setHasNoRedemptions(false);
@@ -120,7 +127,9 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
       }
     } catch (error) {
       setError(
-        error instanceof Error ? error.message : "An unexpected error occurred."
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred.",
       );
     } finally {
       setIsLoading(false);
@@ -139,15 +148,15 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
     setIsSuspending(true);
     setShowSuspendModal(false);
     setError("");
-  
+
     const accessToken = Cookies.get("accessToken");
-  
+
     if (!accessToken) {
       setError("Access token not found");
       setIsSuspending(false);
       return;
     }
-  
+
     const suspendVendor = async (token: string) => {
       try {
         const response = await fetch(
@@ -158,10 +167,10 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
-          }
+          },
         );
         if (response.status === 401) return null;
-  
+
         if (!response.ok) {
           if (response.status === 404) {
             setError("Vendor not found");
@@ -173,7 +182,7 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
             return null;
           }
         }
-  
+
         const data = await response.json();
         return data;
       } catch (err) {
@@ -184,21 +193,21 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
         return null;
       }
     };
-  
+
     try {
       let data = await suspendVendor(accessToken);
-  
+
       if (data === "404_handled") {
         return;
       }
-  
+
       if (!data) {
         const newAccessToken = await refreshToken();
-  
+
         if (newAccessToken) {
           Cookies.set("accessToken", newAccessToken);
           data = await suspendVendor(newAccessToken);
-  
+
           if (data === "404_handled") {
             return;
           }
@@ -208,10 +217,10 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
           return;
         }
       }
-  
+
       if (data) {
         setSuspendMessage(
-          data.msg || data.message || "Vendor has been suspended successfully"
+          data.msg || data.message || "Vendor has been suspended successfully",
         );
         setShowSuspendSuccess(true);
         setTimeout(() => setShowSuspendSuccess(false), 5000);
@@ -220,7 +229,9 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
       }
     } catch (error) {
       setError(
-        error instanceof Error ? error.message : "An unexpected error occurred."
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred.",
       );
     } finally {
       setIsSuspending(false);
@@ -312,25 +323,27 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
             <p className="text-gray-600">{vendor.phoneNumber}</p>
             <p className="text-xs text-gray-500 font-mono mt-1">{vendor._id}</p>
           </div>
-          <div className="text-right">
-            <Button
-              onClick={handleSuspendVendor}
-              disabled={isSuspending}
-              className="bg-[#d62e1f] hover:bg-[#b22e1f] text-white px-6 py-2 text-sm font-semibold rounded-lg transition-colors duration-200 flex items-center gap-2"
-            >
-              {isSuspending ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Suspending...
-                </>
-              ) : (
-                <>
-                  <Ban className="h-4 w-4" />
-                  Suspend Vendor
-                </>
-              )}
-            </Button>
-          </div>
+          {isAdmin && (
+            <div className="text-right">
+              <Button
+                onClick={handleSuspendVendor}
+                disabled={isSuspending}
+                className="bg-[#d62e1f] hover:bg-[#b22e1f] text-white px-6 py-2 text-sm font-semibold rounded-lg transition-colors duration-200 flex items-center gap-2"
+              >
+                {isSuspending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Suspending...
+                  </>
+                ) : (
+                  <>
+                    <Ban className="h-4 w-4" />
+                    Suspend Vendor
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -392,7 +405,8 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
         </div>
       </div>
 
-      {hasNoRedemptions ? null : (
+      {/* Only show payment form for admins */}
+      {isAdmin && !hasNoRedemptions && (
         <PaymentForm vendor={vendor} onPaymentSuccess={fetchRedeemedUsers} />
       )}
 
@@ -464,7 +478,7 @@ export default function VendorDetails({ vendor, onBack }: VendorDetailsProps) {
         </div>
       ) : null}
 
-      {showSuspendModal && (
+      {isAdmin && showSuspendModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all border border-gray-100">
             <div className="relative overflow-hidden">

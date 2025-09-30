@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,12 +10,25 @@ import { refreshToken } from "@/utils/authService";
 
 interface VendorsTableProps {
   onVendorSelect: (vendor: Vendor) => void;
+  userRole?: string;
 }
 
-export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
+export default function VendorsTable({
+  onVendorSelect,
+  userRole,
+}: VendorsTableProps) {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const getAgentName = (agentId: string | undefined): string | null => {
+    if (!agentId) return null;
+    const agent = vendors.find((v) => v._id === agentId);
+    if (agent) {
+      return `${agent.firstName} ${agent.lastName}`;
+    }
+    return null;
+  };
 
   const fetchVendors = async () => {
     setIsLoading(true);
@@ -30,16 +44,18 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
 
     const fetchVendor = async (token: string) => {
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/user/all-vendors`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const endpoint =
+          userRole === "agent"
+            ? `${process.env.NEXT_PUBLIC_BASE_URL}/user/all-vendors-per-agent`
+            : `${process.env.NEXT_PUBLIC_BASE_URL}/user/all-vendors`;
+
+        const response = await fetch(endpoint, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
         if (response.status === 401) return null;
 
         if (!response.ok) {
@@ -81,7 +97,9 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
       }
     } catch (error) {
       setError(
-        error instanceof Error ? error.message : "An unexpected error occurred."
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred.",
       );
     } finally {
       setIsLoading(false);
@@ -97,10 +115,10 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
 
   const sortedVendors = [
     ...activeVendors.sort(
-      (a, b) => b.unpaidRedeemedUsersCount - a.unpaidRedeemedUsersCount
+      (a, b) => b.unpaidRedeemedUsersCount - a.unpaidRedeemedUsersCount,
     ),
     ...suspendedVendors.sort(
-      (a, b) => b.unpaidRedeemedUsersCount - a.unpaidRedeemedUsersCount
+      (a, b) => b.unpaidRedeemedUsersCount - a.unpaidRedeemedUsersCount,
     ),
   ];
 
@@ -155,45 +173,38 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
   }
 
   return (
-    <div className="space-y-4 max-w-5xl mx-auto">
+    <div className="space-y-4">
       <div className="hidden lg:flex items-center justify-between mb-2">
-        <div className="flex items-center gap-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
-              All Vendors
-            </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Manage and monitor vendor accounts
-            </p>
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 tracking-tight">
+            All Vendors
+          </h2>
+          <p className="text-xs text-gray-500 mt-1">
+            Manage and monitor vendor accounts
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm">
+            <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium text-gray-700">
+              {activeVendors.length} active{" "}
+              {activeVendors.length === 1 ? "vendor" : "vendors"} (
+              {suspendedVendors.length} suspended)
+            </span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm">
-              <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-gray-700">
-                {activeVendors.length} active{" "}
-                {activeVendors.length === 1 ? "vendor" : "vendors"} (
-                {suspendedVendors.length} suspended)
-              </span>
+          <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm">
+            <TrendingUp className="h-4 w-4 text-gray-600" />
+            <div className="text-xs text-gray-500 uppercase tracking-wide">
+              Outstanding
             </div>
-
-            <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm">
-              <TrendingUp className="h-4 w-4 text-gray-600" />
-              <div className="text-xs text-gray-500 uppercase tracking-wide">
-                Outstanding
-              </div>
-              <div className="text-sm font-bold text-[#d62e1f]">
-                KSh {totalUnpaidAmount.toLocaleString()}
-              </div>
+            <div className="text-sm font-bold text-[#d62e1f]">
+              KSh {totalUnpaidAmount.toLocaleString()}
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="text-right">
-            <div className="text-xs text-gray-500">Last updated</div>
-            <div className="text-sm font-medium text-gray-700">Just now</div>
-          </div>
           <Button
             onClick={fetchVendors}
             variant="ghost"
@@ -258,6 +269,11 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                   Unpaid
                 </th>
+                {userRole === "admin" && (
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                    Agent
+                  </th>
+                )}
                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                   Status
                 </th>
@@ -276,14 +292,14 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
               {sortedVendors.map((vendor) => (
                 <tr
                   key={vendor._id}
-                  className={`hover:bg-gradient-to-r cursor-pointer transition-all duration-300 border-b border-gray-100 hover:shadow-sm ${
+                  className={`hover:bg-gradient-to-r cursor-pointer transition-all duration-300 border-b border-gray-200 hover:shadow-sm ${
                     vendor.suspended
-                      ? "hover:from-red-50 hover:to-pink-50 hover:border-red-200 bg-red-50/90"
-                      : "hover:from-blue-50 hover:to-indigo-50 hover:border-blue-200"
+                      ? "hover:from-red-50 hover:to-pink-50 hover:border-red-100 bg-red-50/90"
+                      : "hover:from-blue-50 hover:to-indigo-50 hover:border-blue-100"
                   }`}
                   onClick={() => onVendorSelect(vendor)}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-2 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="">
                         <p
@@ -293,13 +309,10 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
                         >
                           {vendor.firstName} {vendor.lastName}
                         </p>
-                        <p className="text-xs text-gray-500 font-mono">
-                          {vendor._id}
-                        </p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-2 whitespace-nowrap">
                     {vendor.unpaidRedeemedUsersCount > 0 ? (
                       <span className="inline-flex items-center justify-center px-3 font-medium rounded-[5px] bg-[#fff9f9] text-[#d62e1f] border-[1px] border-[#d62e1f]">
                         {vendor.unpaidRedeemedUsersCount}
@@ -308,7 +321,33 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
                       <span className="text-sm text-gray-400">—</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  {userRole === "admin" && (
+                    <td className="px-6 py-2 whitespace-nowrap">
+                      {vendor.agent ? (
+                        typeof vendor.agent === "object" ? (
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 capitalize">
+                              {vendor.agent.firstName} {vendor.agent.lastName}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {vendor.agent.phoneNumber}
+                            </p>
+                          </div>
+                        ) : getAgentName(vendor.agent) ? (
+                          <p className="text-sm font-medium text-gray-900 capitalize">
+                            {getAgentName(vendor.agent)}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-gray-500 font-mono">
+                            {vendor.agent}
+                          </p>
+                        )
+                      ) : (
+                        <span className="text-sm text-gray-400">—</span>
+                      )}
+                    </td>
+                  )}
+                  <td className="px-6 py-2 whitespace-nowrap">
                     {vendor.suspended ? (
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-200">
                         <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
@@ -321,27 +360,19 @@ export default function VendorsTable({ onVendorSelect }: VendorsTableProps) {
                       </span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-2 whitespace-nowrap">
                     <div className="flex items-center justify-center">
                       <span className="text-sm font-sans text-gray-700 bg-gray-50 px-3 py-1 rounded-lg">
                         {vendor.phoneNumber}
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-2 whitespace-nowrap">
                     <div className="text-sm text-gray-600">
                       {formatDate(vendor.createdAt)}
                     </div>
-                    <div className="text-xs text-gray-400">
-                      {Math.floor(
-                        (new Date().getTime() -
-                          new Date(vendor.createdAt).getTime()) /
-                          (1000 * 60 * 60 * 24)
-                      )}{" "}
-                      days ago
-                    </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-2 whitespace-nowrap">
                     <Button
                       variant="ghost"
                       size="sm"

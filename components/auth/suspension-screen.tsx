@@ -24,20 +24,20 @@ export function SuspensionScreen() {
             className="text-center mb-8"
           >
             <motion.div
-              animate={{ 
+              animate={{
                 rotate: [0, -10, 10, -10, 0],
-                scale: [1, 1.1, 1, 1.1, 1]
+                scale: [1, 1.1, 1, 1.1, 1],
               }}
-              transition={{ 
+              transition={{
                 duration: 2,
                 repeat: Infinity,
-                repeatDelay: 3
+                repeatDelay: 3,
               }}
               className="w-24 h-24 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-red-500/50"
             >
               <Ban className="w-12 h-12 text-red-400" />
             </motion.div>
-            
+
             <motion.h1
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -67,16 +67,29 @@ export function SuspensionScreen() {
               <AlertTriangle className="w-6 h-6 text-red-400 flex-shrink-0 mt-1" />
               <div className="text-white leading-relaxed">
                 <p className="mb-4">
-                  Our system has detected violations of the campaign rules, specifically the use of{" "}
-                  <span className="font-semibold text-red-300">non-existent phone numbers</span>,{" "}
-                  <span className="font-semibold text-red-300">duplicate registrations</span>,{" "}
-                  <span className="font-semibold text-red-300">inactivity</span>, or other forms of abuse in creating digital addresses.
+                  Our system has detected violations of the campaign rules,
+                  specifically the use of{" "}
+                  <span className="font-semibold text-red-300">
+                    non-existent phone numbers
+                  </span>
+                  ,{" "}
+                  <span className="font-semibold text-red-300">
+                    duplicate registrations
+                  </span>
+                  ,{" "}
+                  <span className="font-semibold text-red-300">inactivity</span>
+                  , or other forms of abuse in creating digital addresses.
                 </p>
                 <p className="mb-4">
-                  Participation in this campaign is strictly limited to genuine, verified users. Any attempt to exploit the system undermines the fairness of the process and will result in immediate suspension.
+                  Participation in this campaign is strictly limited to genuine,
+                  verified users. Any attempt to exploit the system undermines
+                  the fairness of the process and will result in immediate
+                  suspension.
                 </p>
                 <p className="font-semibold text-red-300">
-                  Your participation privileges have therefore been revoked. This action is final and applies to all accounts found in breach of the rules.
+                  Your participation privileges have therefore been revoked.
+                  This action is final and applies to all accounts found in
+                  breach of the rules.
                 </p>
               </div>
             </div>
@@ -89,7 +102,9 @@ export function SuspensionScreen() {
             className="flex items-center justify-center gap-3 mb-8 text-gray-300"
           >
             <Shield className="w-5 h-5" />
-            <span className="text-sm font-medium">Protected by Pickspot Security</span>
+            <span className="text-sm font-medium">
+              Protected by Pickspot Security
+            </span>
           </motion.div>
 
           <motion.div
@@ -117,27 +132,27 @@ export function SuspensionScreen() {
         </div>
 
         <motion.div
-          animate={{ 
+          animate={{
             y: [0, -10, 0],
-            opacity: [0.3, 0.6, 0.3]
+            opacity: [0.3, 0.6, 0.3],
           }}
-          transition={{ 
+          transition={{
             duration: 3,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: "easeInOut",
           }}
           className="absolute top-10 left-10 w-4 h-4 bg-red-500/30 rounded-full blur-sm"
         />
         <motion.div
-          animate={{ 
+          animate={{
             y: [0, 15, 0],
-            opacity: [0.2, 0.5, 0.2]
+            opacity: [0.2, 0.5, 0.2],
           }}
-          transition={{ 
+          transition={{
             duration: 4,
             repeat: Infinity,
             ease: "easeInOut",
-            delay: 1
+            delay: 1,
           }}
           className="absolute bottom-20 right-20 w-6 h-6 bg-red-400/20 rounded-full blur-sm"
         />

@@ -12,7 +12,10 @@ interface PaymentFormProps {
   onPaymentSuccess: () => void;
 }
 
-export default function PaymentForm({ vendor, onPaymentSuccess }: PaymentFormProps) {
+export default function PaymentForm({
+  vendor,
+  onPaymentSuccess,
+}: PaymentFormProps) {
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -20,7 +23,7 @@ export default function PaymentForm({ vendor, onPaymentSuccess }: PaymentFormPro
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!amount.trim()) {
       setError("Please enter an amount");
       return;
@@ -57,21 +60,19 @@ export default function PaymentForm({ vendor, onPaymentSuccess }: PaymentFormPro
           totalPayout: totalPayout,
         };
 
-        const response = await fetch(endpoint,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify(payload),
+        });
         if (response.status === 401) return null;
 
         if (!response.ok) {
           const data = await response.json();
-          
+
           if (response.status === 404) {
             setError("No unpaid users for this vendor");
           } else {
@@ -115,7 +116,9 @@ export default function PaymentForm({ vendor, onPaymentSuccess }: PaymentFormPro
       }
     } catch (error) {
       setError(
-        error instanceof Error ? error.message : "An unexpected error occurred.",
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred.",
       );
     } finally {
       setIsLoading(false);
@@ -130,12 +133,17 @@ export default function PaymentForm({ vendor, onPaymentSuccess }: PaymentFormPro
         <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
           <DollarSign className="h-4 w-4 text-gray-600" />
         </div>
-        <h3 className="text-lg font-medium text-gray-900 ml-3">Process Payment</h3>
+        <h3 className="text-lg font-medium text-gray-900 ml-3">
+          Process Payment
+        </h3>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="amount"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Total Payout Amount (KSh)
           </label>
           <input
@@ -151,7 +159,8 @@ export default function PaymentForm({ vendor, onPaymentSuccess }: PaymentFormPro
           />
           {expectedUsers > 0 && (
             <p className="text-xs text-green-700 mt-1">
-              This will mark {expectedUsers} user{expectedUsers !== 1 ? 's' : ''} as paid
+              This will mark {expectedUsers} user
+              {expectedUsers !== 1 ? "s" : ""} as paid
             </p>
           )}
         </div>

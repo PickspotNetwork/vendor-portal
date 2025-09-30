@@ -5,7 +5,7 @@ export async function middleware(req: NextRequest) {
   let token = req.cookies.get("accessToken")?.value;
   const refreshToken = req.cookies.get("refresh_token")?.value;
 
-  const protectedRoutes = ["/dashboard", "/settings", "/admin"];
+  const protectedRoutes = ["/dashboard", "/settings", "/admin", "/agent"];
 
   if (protectedRoutes.includes(req.nextUrl.pathname)) {
     if (!token && refreshToken) {
@@ -48,5 +48,6 @@ export const config = {
     "/dashboard",
     "/settings",
     "/admin",
+    "/agent",
   ],
 };
