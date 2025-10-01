@@ -80,6 +80,7 @@ export interface Vendor {
         phoneNumber: string;
       }
     | string;
+  agentName?: string | null;
 }
 
 export interface VendorsResponse {

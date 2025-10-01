@@ -21,15 +21,6 @@ export default function VendorsTable({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const getAgentName = (agentId: string | undefined): string | null => {
-    if (!agentId) return null;
-    const agent = vendors.find((v) => v._id === agentId);
-    if (agent) {
-      return `${agent.firstName} ${agent.lastName}`;
-    }
-    return null;
-  };
-
   const fetchVendors = async () => {
     setIsLoading(true);
     setError("");
@@ -323,25 +314,10 @@ export default function VendorsTable({
                   </td>
                   {userRole === "admin" && (
                     <td className="px-6 py-2 whitespace-nowrap">
-                      {vendor.agent ? (
-                        typeof vendor.agent === "object" ? (
-                          <div>
-                            <p className="text-sm font-medium text-gray-900 capitalize">
-                              {vendor.agent.firstName} {vendor.agent.lastName}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {vendor.agent.phoneNumber}
-                            </p>
-                          </div>
-                        ) : getAgentName(vendor.agent) ? (
-                          <p className="text-sm font-medium text-gray-900 capitalize">
-                            {getAgentName(vendor.agent)}
-                          </p>
-                        ) : (
-                          <p className="text-xs text-gray-500 font-mono">
-                            {vendor.agent}
-                          </p>
-                        )
+                      {vendor.agentName ? (
+                        <p className="text-sm font-medium text-gray-900 capitalize">
+                          {vendor.agentName}
+                        </p>
                       ) : (
                         <span className="text-sm text-gray-400">—</span>
                       )}

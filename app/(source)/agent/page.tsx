@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Vendor } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useUser } from "@/context/UserContext";
@@ -9,6 +10,7 @@ import RedemptionForm from "@/components/redemption-form";
 import RecentRedemptions from "@/components/recent-redemptions";
 import VendorDetails from "@/components/admin/vendor-details";
 import VendorsTable from "@/components/admin/vendors-table";
+import { UserPlus, Sparkles } from "lucide-react";
 
 export default function AgentsDashboard() {
   const { error, success, clearMessages } = useAuth();
@@ -50,7 +52,7 @@ export default function AgentsDashboard() {
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
-                Vendors
+                My Vendors
               </button>
             </nav>
           </div>
@@ -84,10 +86,39 @@ export default function AgentsDashboard() {
                   userRole={user?.role}
                 />
               ) : (
-                <VendorsTable
-                  onVendorSelect={handleVendorSelect}
-                  userRole={user?.role}
-                />
+                <div className="space-y-6">
+                  <div className="relative overflow-hidden rounded-2xl bg-black lg:p-4 shadow-lg">
+                    <div className="relative flex items-center justify-between">
+                      <div className="hidden lg:flex items-start gap-4">
+                        <div className="rounded-xl bg-white/20 p-3 backdrop-blur-sm">
+                          <UserPlus className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-white mb-1">
+                            Add New Vendor
+                          </h3>
+                          <p className="text-white/90 text-sm max-w-md">
+                            Register a new vendor account and help expand the Pickspot network
+                          </p>
+                        </div>
+                      </div>
+
+                      <Link
+                        href="/settings"
+                        className="group relative flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-black shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl w-full lg:w-auto justify-center lg:justify-start"
+                      >
+                        <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
+                        <span>Create Vendor</span>
+                        <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 transition-opacity group-hover:opacity-100"></div>
+                      </Link>
+                    </div>
+                  </div>
+
+                  <VendorsTable
+                    onVendorSelect={handleVendorSelect}
+                    userRole={user?.role}
+                  />
+                </div>
               )}
             </div>
           )}

@@ -191,7 +191,7 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="mb-2">
+      <div className="mb-2 mt-12 md:mt-0">
         <Link
           href={
             user?.role === "admin"
@@ -210,7 +210,7 @@ export default function SettingsPage() {
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-8">
         {user?.role === "agent" && (
-          <div className="pt-2">
+          <div className="py-6">
             <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
               <UserPlus className="h-5 w-5 text-[#D62E1F]" />
               Sign Up a Vendor
