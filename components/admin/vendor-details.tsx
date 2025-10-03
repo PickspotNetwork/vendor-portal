@@ -24,10 +24,11 @@ interface VendorDetailsProps {
 }
 
 export default function VendorDetails({
-  vendor,
+  vendor: initialVendor,
   onBack,
   userRole,
 }: VendorDetailsProps) {
+  const [vendor, setVendor] = useState<Vendor>(initialVendor);
   const [redeemedUsers, setRedeemedUsers] = useState<RedeemedUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -38,6 +39,72 @@ export default function VendorDetails({
   const [showSuspendModal, setShowSuspendModal] = useState(false);
 
   const isAdmin = userRole === "admin";
+
+  const fetchVendorDetails = useCallback(async () => {
+    const accessToken = Cookies.get("accessToken");
+
+    if (!accessToken) {
+      setError("Access token not found");
+      return;
+    }
+
+    const fetchVendor = async (token: string) => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/user/vendor/${initialVendor._id}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+        if (response.status === 401) return null;
+
+        if (!response.ok) {
+          setError("Error fetching vendor details");
+          return null;
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to fetch vendor details";
+        setError(errorMessage);
+        return null;
+      }
+    };
+
+    try {
+      let data = await fetchVendor(accessToken);
+
+      if (!data) {
+        const newAccessToken = await refreshToken();
+
+        if (newAccessToken) {
+          Cookies.set("accessToken", newAccessToken);
+          data = await fetchVendor(newAccessToken);
+        } else {
+          setError("Session expired");
+          return;
+        }
+      }
+
+      if (data && data.vendor) {
+        setVendor(data.vendor);
+      } else {
+        setError("Failed to fetch vendor details");
+      }
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred.",
+      );
+    }
+  }, [initialVendor._id]);
 
   const fetchRedeemedUsers = useCallback(async () => {
     setIsLoading(true);
@@ -55,7 +122,7 @@ export default function VendorDetails({
     const fetchRedeemed = async (token: string) => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/user/all-redeemed-users-per-vendor/${vendor._id}`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/user/all-redeemed-users-per-vendor/${initialVendor._id}`,
           {
             method: "GET",
             headers: {
@@ -134,11 +201,12 @@ export default function VendorDetails({
     } finally {
       setIsLoading(false);
     }
-  }, [vendor._id]);
+  }, [initialVendor._id]);
 
   useEffect(() => {
+    fetchVendorDetails();
     fetchRedeemedUsers();
-  }, [fetchRedeemedUsers]);
+  }, [fetchVendorDetails, fetchRedeemedUsers]);
 
   const handleSuspendVendor = () => {
     setShowSuspendModal(true);
@@ -250,9 +318,8 @@ export default function VendorDetails({
 
   const totalEarnings = redeemedUsers.length * 50;
   const paidUsers = redeemedUsers.filter((user) => user.isPaid).length;
-  const unpaidUsers = redeemedUsers.length - paidUsers;
   const amountPaid = paidUsers * 50;
-  const amountUnpaid = unpaidUsers * 50;
+  const amountUnpaid = vendor.totalAmountOwed || 0;
 
   if (isLoading) {
     return (
@@ -305,7 +372,10 @@ export default function VendorDetails({
           Back to Vendors
         </Button>
         <Button
-          onClick={fetchRedeemedUsers}
+          onClick={() => {
+            fetchVendorDetails();
+            fetchRedeemedUsers();
+          }}
           variant="ghost"
           size="sm"
           className="h-8 w-8 p-0"
@@ -347,7 +417,7 @@ export default function VendorDetails({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center">
             <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
@@ -404,23 +474,31 @@ export default function VendorDetails({
           </div>
         </div>
 
+        {vendor.role === "agent" && (
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <DollarSign className="h-4 w-4 text-green-600" />
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <DollarSign className="h-4 w-4 text-blue-600" />
               </div>
               <div className="ml-3">
                 <p className="text-sm text-gray-600">Commissions Owed</p>
-                <p className="text-xl font-semibold text-green-600">
-                  KSh {(amountUnpaid === 0 ? 0 : vendor.commissionsOwed).toLocaleString()}
+                <p className="text-xl font-semibold text-blue-600">
+                  KSh {(vendor.commissionsOwed || 0).toLocaleString()}
                 </p>
               </div>
             </div>
           </div>
+        )}
       </div>
 
       {isAdmin && !hasNoRedemptions && (
-        <PaymentForm vendor={vendor} onPaymentSuccess={fetchRedeemedUsers} />
+        <PaymentForm
+          vendor={vendor}
+          onPaymentSuccess={() => {
+            fetchVendorDetails();
+            fetchRedeemedUsers();
+          }}
+        />
       )}
 
       {!hasNoRedemptions && redeemedUsers.length === 0 ? (

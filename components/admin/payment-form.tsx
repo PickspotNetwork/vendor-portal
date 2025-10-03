@@ -45,11 +45,6 @@ export default function PaymentForm({
       return;
     }
 
-    if (vendor.role === "agent" && totalPayout < 50) {
-      setError("Minimum payment for agents is KSh 50");
-      return;
-    }
-
     setIsLoading(true);
     setError("");
     setSuccess("");
@@ -161,9 +156,9 @@ export default function PaymentForm({
             id="amount"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder={vendor.role === "agent" ? "Enter amount (min 50)" : "Enter amount (min 100, e.g., 250)"}
+            placeholder={vendor.role === "agent" ? "Enter amount" : "Enter amount (min 100, e.g., 250)"}
             step={vendor.role === "agent" ? "1" : "50"}
-            min={vendor.role === "agent" ? "50" : "100"}
+            min={vendor.role === "agent" ? "1" : "100"}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500"
             disabled={isLoading}
           />

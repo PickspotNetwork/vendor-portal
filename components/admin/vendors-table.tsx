@@ -323,6 +323,11 @@ export default function VendorsTable({
                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                   Unpaid
                 </th>
+                {(userType === "agent" || userRole === "agent") && (
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                    Commissions
+                  </th>
+                )}
                 {userRole === "admin" && userType === "vendor" && (
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                     Agent
@@ -375,6 +380,17 @@ export default function VendorsTable({
                       <span className="text-sm text-gray-400">—</span>
                     )}
                   </td>
+                  {(userType === "agent" || userRole === "agent") && (
+                    <td className="px-6 py-2 whitespace-nowrap">
+                      {vendor.commissionsOwed > 0 ? (
+                        <span className="inline-flex items-center justify-center px-3 font-medium rounded-[5px] bg-green-50 text-green-600 border-[1px] border-green-200">
+                          KSh {vendor.commissionsOwed.toLocaleString()}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-400">—</span>
+                      )}
+                    </td>
+                  )}
                   {userRole === "admin" && userType === "vendor" && (
                     <td className="px-6 py-2 whitespace-nowrap">
                       {vendor.agentName ? (

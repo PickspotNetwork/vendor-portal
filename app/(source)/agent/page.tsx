@@ -87,6 +87,7 @@ export default function AgentsDashboard() {
                 <VendorsTable
                   onVendorSelect={handleVendorSelect}
                   userRole={user?.role}
+                  userType="vendor"
                 />
               )}
             </div>
