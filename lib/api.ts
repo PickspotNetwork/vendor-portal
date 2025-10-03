@@ -67,11 +67,16 @@ export interface Vendor {
   firstName: string;
   lastName: string;
   phoneNumber: string;
+  password: string;
   role: string;
   createdAt: string;
   updatedAt: string;
+  __v: number;
   unpaidRedeemedUsersCount: number;
   suspended?: boolean;
+  amountOwed: number;
+  commissionsOwed: number;
+  totalAmountOwed: number;
   agent?:
     | {
         _id: string;
