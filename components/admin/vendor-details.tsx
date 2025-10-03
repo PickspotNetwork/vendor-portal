@@ -298,7 +298,7 @@ export default function VendorDetails({
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={onBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -347,7 +347,7 @@ export default function VendorDetails({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center">
             <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
@@ -403,9 +403,22 @@ export default function VendorDetails({
             </div>
           </div>
         </div>
+
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <DollarSign className="h-4 w-4 text-green-600" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-gray-600">Commissions Owed</p>
+                <p className="text-xl font-semibold text-green-600">
+                  KSh {(amountUnpaid === 0 ? 0 : vendor.commissionsOwed).toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </div>
       </div>
 
-      {/* Only show payment form for admins */}
       {isAdmin && !hasNoRedemptions && (
         <PaymentForm vendor={vendor} onPaymentSuccess={fetchRedeemedUsers} />
       )}
