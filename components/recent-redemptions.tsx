@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import Cookies from "js-cookie";
-import { DollarSign, User, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { refreshToken } from "@/utils/authService";
+import Cookies from "js-cookie";
+import { DollarSign, Loader2, RefreshCw, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 interface RedeemedUser {
   _id: string;
@@ -280,7 +280,17 @@ export default function RecentRedemptions() {
             </div>
           </div>
 
-          <div className="mt-2 pt-3 border-t border-gray-700">
+          <div className="mt-2 pt-3 border-t border-gray-700 space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 bg-blue-500/50 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xs">!</span>
+              </div>
+              <p className="text-xs text-gray-300">
+                <span className="font-medium text-blue-300">
+                  Dear valued partner, payments will resume on Monday. We appreciate your patience as we resolve a few technical hiccups. Thank you for your understanding!
+                </span>
+              </p>
+            </div>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 bg-[#D62E1F]/50 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-xs">!</span>

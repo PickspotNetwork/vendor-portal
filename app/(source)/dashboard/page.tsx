@@ -2,9 +2,9 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { Notification } from "@/components/ui/notification";
-import RedemptionForm from "@/components/redemption-form";
+// import RedemptionForm from "@/components/redemption-form";
 import RecentRedemptions from "@/components/recent-redemptions";
-// import Image from "next/image";
+import Image from "next/image";
 
 export default function Dashboard() {
   const { error, success, clearMessages } = useAuth();
@@ -20,7 +20,7 @@ export default function Dashboard() {
             <p className="text-gray-600">
               Redeem Pickspot app users by entering their digital handle
             </p>
-            {/* <p className="text-gray-600 mb-2">
+            <p className="text-gray-600 mb-2">
               We&apos;re taking out the trash and making things better!
             </p>
             <div className="flex flex-col items-center justify-center pt-8">
@@ -36,10 +36,10 @@ export default function Dashboard() {
                 experience. The redemption form will be back soon, better than
                 ever!
               </p>
-            </div> */}
+            </div>
           </div>
 
-          <RedemptionForm />
+          {/* <RedemptionForm /> */}
         </div>
 
         <div className="mt-4 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
